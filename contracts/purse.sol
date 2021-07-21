@@ -54,7 +54,9 @@ contract PurseContract{
     mapping(address => bool) member_close_Purse_Vote;
     mapping(address => bool) member_reOpen_Purse_Vote;
     mapping(address => bool) member_terminate_PurseVote;
-    mapping(address => bool) member_has_recieved; //
+    mapping(address => bool) member_has_recieved; // maps a member address to check wether he has recieved a round of contribution or not
+    mapping(address => uint256) votes_for_member_to_recieve_funds;//maps a user to no of votes to have funds received- this will be required to be equal to no of members in a group
+    mapping(address => mapping(address=> bool)) has_voted_for_member_to_recieve_Funds;
     
     
     address _address_of_token; //address of erc20 token - basically a stable coin
@@ -116,12 +118,26 @@ contract PurseContract{
         require(isPurseMember[msg.sender] == true, 'only purse members please');
         //this function is after the first round, at this point, user doesnt need to deposit collateral
     }
+    
+    /* Members will have agreed on the order of recieving funds. the function will expect every member to vote for an address to recieve
+    
+    */
      function voteToDisburseFundstoMember(address _memberAddress) public{
+            require(isPurseMember[msg.sender] == true, 'only purse members please');
             require(isPurseMember[_memberAddress] == true, 'This provided address is not a member');
             require(member_has_recieved[_memberAddress] == false, 'this member has recieved a round of contribution already');
+            require(has_voted_for_member_to_recieve_Funds[msg.sender][_memberAddress] == false, 'You can not vote twice in this round for this address to recieve');
             
+            //increment vote for member to recieve funds
+            votes_for_member_to_recieve_funds[_memberAddress]++;
             
-            //after disbursing funds, reset some mappings to enable memebers to deposit again for another round
+            if(votes_for_member_to_recieve_funds[_memberAddress] == purse.members.length){
+                //this if statemement checks that every member has voted for a member. the member himself too would have voted
+                //the funds then gets disbursed to himself
+                
+            }
+            
+            //after disbursing funds, reset some mappings to enable members to deposit again for another round
     }
 
     
