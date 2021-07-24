@@ -302,10 +302,12 @@ td {
 /* our styles here */
 body {
   background-color: var(--ebony-clay);
+  color: #fff;
 }
 
 #tsparticles {
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: -100;
 }
