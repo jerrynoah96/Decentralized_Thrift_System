@@ -4,6 +4,7 @@
   background-color: rgba(7, 9, 12, 0.7);
   margin-top: 4rem;
   border-radius: 1rem;
+  padding: 1rem;
 }
 
 .dex-wrapper h1 {
@@ -33,6 +34,8 @@
   padding: 0;
   text-overflow: ellipsis;
   color: #fff;
+  min-width: 2rem;
+  margin-left: 2rem;
 }
 
 .dex-wrapper .from-section input::placeholder,
@@ -41,7 +44,6 @@
 }
 
 .dex-wrapper .exchange-arrow-container {
-  /* background-color: rgb(98, 96, 134); */
   display: inline-block;
   padding: 1rem;
 }
@@ -52,33 +54,23 @@
   color: #fff;
 }
 
-.dex-wrapper .from-section button,
-.dex-wrapper .to-section button {
+.dex-wrapper .from-section select,
+.dex-wrapper .to-section select {
   font-size: 1.5;
   font-weight: bold;
-  border: none;
   outline: none;
   background: rgba(198, 196, 203, 0.4);
   border: 1px solid rgba(198, 196, 203, 0.5);
   color: #fff;
-  padding: 0.5rem 3rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.7rem;
   transition: all 0.3s ease-in-out;
-  display: flex;
-  align-items: flex-end;
-  position: relative;
 }
 
-.dex-wrapper .from-section button .crypto-dropdown-arrow-icon,
-.dex-wrapper .to-section button .crypto-dropdown-arrow-icon {
-  position: absolute;
-  right: 0.5rem;
-  font-size: 1.2rem;
-}
-
-.dex-wrapper .from-section button:hover,
-.dex-wrapper .to-section button:hover {
-  background: rgba(118, 100, 163, 0.3);
+.dex-wrapper .from-section select option {
+  color: var(--ebony-clay);
+  background-color: var(--dolphin);
+  font-weight: bold;
 }
 
 .dex-wrapper .swap-btn {
@@ -92,4 +84,32 @@
   border-radius: 1rem;
   color: var(--french-gray);
   font-size: 1.5rem;
+}
+
+@media only screen and (max-width: 768px) {
+  .dex-wrapper {
+    margin-bottom: 5rem;
+    margin-top: 2rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .dex-wrapper .from-section,
+  .dex-wrapper .to-section {
+    padding: 1rem;
+  }
+
+  .dex-wrapper .from-section input,
+  .dex-wrapper .to-section input {
+    font-size: 1rem;
+  }
+
+  .dex-wrapper .exchange-arrow-container {
+    display: inline-block;
+    padding: 0.5rem;
+  }
+
+  .dex-wrapper .swap-btn {
+    font-size: 1.2rem;
+  }
 }

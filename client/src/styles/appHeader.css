@@ -6,7 +6,6 @@
   color: #fff;
   padding: 1rem 2rem;
   max-width: 100%;
-  /* overflow-y: hidden; */
 }
 
 .header-container .logo-container {
@@ -59,8 +58,29 @@
   color: var(--french-gray);
   font-weight: bold;
   transition: all ease-in-out 0.3s;
+  white-space: nowrap;
 }
 
 .header-container .user-section button:hover {
   opacity: 1;
+}
+
+@media only screen and (max-width: 768px) {
+  .header-container {
+    padding: 1rem;
+  }
+
+  .header-container .navigation {
+    position: fixed;
+    bottom: 2rem;
+    left: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .header-container .navigation ul li {
+    margin: 0 1rem;
+    padding: 0.5rem 1rem;
+  }
 }
