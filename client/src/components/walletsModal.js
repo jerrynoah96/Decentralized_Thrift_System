@@ -3,9 +3,10 @@ import {injected, walletconnect} from '../connectors'
 import { Web3ReactProvider, useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
 import "../styles/walletsModal.css"
 import {AiOutlineClose} from "react-icons/ai"
+import Backdrop from "../components/Backdrop"
 
 
-const WalletsModal = () => {
+const WalletsModal = ({dismissModal}) => {
 
     const context = useWeb3React();
     const { connector, library, chainId, account, activate, deactivate, active, error } = context
@@ -17,6 +18,7 @@ const WalletsModal = () => {
         if (activatingConnector && activatingConnector === connector) {
         setActivatingConnector(undefined)
         }
+        console.log("account.... ",account)
     }, [activatingConnector, connector])
 
     const connectorsByName = {
@@ -26,10 +28,12 @@ const WalletsModal = () => {
     }
 
     return(
-        <div className = "wallets-modal">
+        <>
+           <Backdrop dismissModal = {dismissModal} />
+           <div className = "wallets-modal">
             <div className = "modal-header">
                 <h2>Select a Wallet</h2>
-                <AiOutlineClose className = "close-icon"/>
+                <AiOutlineClose className = "close-icon" onClick = {dismissModal}/>
             </div>
             <div className = "modal-body">
                 {Object.keys(connectorsByName).map(name => {
@@ -55,6 +59,8 @@ const WalletsModal = () => {
                 <a href = "https://ethereum.org/wallets/">Learn more about wallets</a>
             </div>
         </div>
+        </>
+        
     )
 }
 

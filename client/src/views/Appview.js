@@ -5,15 +5,9 @@ import customParticle from "../utils/particles.json"
 import AppHeader from "../components/AppHeader";
 import Swap from "../pages/Swap"
 import WalletsModal from "../components/walletsModal"
-
-import { Web3ReactProvider, useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
-import {
-  NoEthereumProviderError,
-  UserRejectedRequestError as UserRejectedRequestErrorInjected
-} from '@web3-react/injected-connector'
+import {useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
+import {NoEthereumProviderError, UserRejectedRequestError as UserRejectedRequestErrorInjected} from '@web3-react/injected-connector'
 import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from '@web3-react/walletconnect-connector'
-import { Web3Provider } from '@ethersproject/providers'
-
 import { useEagerConnect, useInactiveListener } from '../hooks'
 
 
@@ -33,21 +27,12 @@ function getErrorMessage(error) {
   }
 }
 
-function getLibrary(provider) {
-  const library = new Web3Provider(provider)
-  library.pollingInterval = 12000
-  return library
-}
-
-
-
-
-  
 
 
 
 const AppView = () => {
 
+  
     const particlesInit = (customParticle) => {
     // console.log(customParticle);
     }
@@ -58,7 +43,8 @@ const AppView = () => {
 
     const context = useWeb3React();
 
-    const { connector, library, chainId, account, activate, deactivate, active, error } = context;
+    console.log(context)
+    const {connector} = context;
 
     // handle logic to recognize the connector currently being activated
     const [activatingConnector, setActivatingConnector] = useState()
@@ -76,6 +62,16 @@ const AppView = () => {
     // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
     useInactiveListener(!triedEager || !!activatingConnector);
 
+
+    const [showWalletModal, setShowWalletModal] = useState(false)
+
+    const HandleDisplayWalletModal = () => {
+      if(showWalletModal) {
+        setShowWalletModal(false)
+      } else {
+        setShowWalletModal(true)
+      }
+    }
     
     return(
         <div className = "app-view">
@@ -116,15 +112,15 @@ const AppView = () => {
                 }}
             />
 
-              <Web3ReactProvider getLibrary={getLibrary}>
-                <AppHeader />
+              
+                <AppHeader HandleDisplayWalletModal = {HandleDisplayWalletModal} />
                 <Switch>
                     <Route path = "/app/swap">
                         <Swap />
                     </Route>
                 </Switch>
-                <WalletsModal />
-              </Web3ReactProvider>
+                
+                {showWalletModal && <WalletsModal dismissModal = {HandleDisplayWalletModal} />}
             
         </div>
     );

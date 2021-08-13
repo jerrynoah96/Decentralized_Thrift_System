@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom"
 import "../styles/appHeader.css"
-const AppHeader = () => {
+const AppHeader = ({HandleDisplayWalletModal}) => {
     return(
         <header className = "header-container">
             <div className = "logo-container">
@@ -20,7 +20,7 @@ const AppHeader = () => {
                 </ul>
             </nav>
             <div className = "user-section">
-                <button>Connect wallet</button>
+                <button onClick = {HandleDisplayWalletModal}>Connect wallet</button>
             </div>
         </header>
     );
