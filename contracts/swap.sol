@@ -15,6 +15,9 @@ contract SwapContract{
     //instantiaite the stable coin we're accepting
     IERC20 whitelisted_coin = IERC20(address_whitelisted_coin);
     
+    //TUSDT address on rinkeby - 0xd92e713d051c37ebb2561803a3b5fbabc4962431
+    //rinekby DAI address - 0xc3dbf84Abb494ce5199D5d4D815b10EC29529ff8
+    
     constructor(){
         owner = msg.sender;
         
@@ -22,10 +25,8 @@ contract SwapContract{
     
     function swapToken_For_Stable_Token(
              uint amountIn,
-              uint amountOutMin,
               address _token,
-              address to,
-              uint deadline
+              uint amountOutMin
         )public {
             
         //transfer token to be swapped into contract
@@ -40,8 +41,10 @@ contract SwapContract{
         address[] memory path = new address[](2);
         path[0] = _token;
         path[1] = address_whitelisted_coin;
+        address _to = msg.sender;
+        uint deadline = block.timestamp + 60;
         
-        
+        routerInstance.swapExactTokensForTokens(amountIn, amountOutMin, path, _to, deadline);
         
     }
     
