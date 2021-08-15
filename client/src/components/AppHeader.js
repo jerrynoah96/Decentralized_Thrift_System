@@ -1,26 +1,58 @@
-import {Link} from "react-router-dom"
+import {useState, useEffect} from "react"
+import {NavLink} from "react-router-dom"
 import "../styles/appHeader.css"
+import UserAccount from "./userAccount"
+import {useWeb3React} from '@web3-react/core'
+import {utils} from "ethers"
+import logoWallet from "../assets/logo.png"
 const AppHeader = ({HandleDisplayWalletModal}) => {
+    const {active,account,library, chainId} = useWeb3React()
+
+    const [balance, setBalance] = useState()
+
+    useEffect(() => {
+        if (!!account && !!library) {
+          let stale = false
+    
+          library.getBalance(account)
+          .then(balance => {
+            if (!stale) {
+                setBalance(utils.formatEther(balance))
+            }
+          })
+          .catch(() => {
+              if (!stale) {
+                setBalance(null)
+              }
+            })
+    
+          return () => {
+            stale = true
+            setBalance(undefined)
+          }
+        }
+      }, [account, library, chainId]) // ensures refresh if referential identity of library doesn't change across chainIds
     return(
         <header className = "header-container">
             <div className = "logo-container">
-                <h2>LOGO</h2>
+                <img src = {logoWallet} alt = "logo" className = "logo" />
             </div>
             <nav className = "navigation">
                 <ul>
                     <li>
-                        <Link to = "/">Home</Link>
+                        <NavLink exact activeClassName = "active-navigation-link" to = "/">Home</NavLink>
                     </li>
                     <li>
-                        <Link to = "/app/swap">Swap</Link>
+                        <NavLink exact activeClassName = "active-navigation-link" to = "/app/swap">Swap</NavLink>
                     </li>
                     <li>
-                        <Link to = "/app/purse">Purses</Link>
+                        <NavLink exact activeClassName = "active-navigation-link" to = "/app/purses">Purses</NavLink>
                     </li>
                 </ul>
             </nav>
             <div className = "user-section">
-                <button onClick = {HandleDisplayWalletModal}>Connect wallet</button>
+                {active ? <UserAccount balance = {balance} address = {account} /> : <button onClick = {HandleDisplayWalletModal}>Connect wallet</button>}
+                
             </div>
         </header>
     );

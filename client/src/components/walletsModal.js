@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react"
 import {injected, walletconnect} from '../connectors'
-import { Web3ReactProvider, useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
+import {useWeb3React} from '@web3-react/core'
 import "../styles/walletsModal.css"
 import {AiOutlineClose} from "react-icons/ai"
 import Backdrop from "../components/Backdrop"
@@ -9,7 +9,7 @@ import Backdrop from "../components/Backdrop"
 const WalletsModal = ({dismissModal}) => {
 
     const context = useWeb3React();
-    const { connector, library, chainId, account, activate, deactivate, active, error } = context
+    const { connector, activate} = context
 
      // handle logic to recognize the connector currently being activated
   const [activatingConnector, setActivatingConnector] = useState()
@@ -18,7 +18,6 @@ const WalletsModal = ({dismissModal}) => {
         if (activatingConnector && activatingConnector === connector) {
         setActivatingConnector(undefined)
         }
-        console.log("account.... ",account)
     }, [activatingConnector, connector])
 
     const connectorsByName = {
@@ -43,7 +42,7 @@ const WalletsModal = ({dismissModal}) => {
                     // const disabled = !triedEager || !!activatingConnector || connected || !!error
 
                     return (
-                        <button style={{height: '3rem',borderRadius: '1rem',borderColor: activating ? 'orange' : connected ? 'green' : 'unset',}}key={name}
+                        <button className = "wallet-button" style={{height: '3rem',borderRadius: '1rem',borderColor: activating ? 'orange' : connected ? 'green' : 'unset',}}key={name}
                         onClick={() => {
                             setActivatingConnector(currentConnector)
                             activate(connectorsByName[name])

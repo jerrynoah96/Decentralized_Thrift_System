@@ -4,7 +4,7 @@ import './App.css';
 import HomeView from './views/HomeView';
 import AppView from './views/Appview';
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
-import { Web3ReactProvider, useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
+import { Web3ReactProvider} from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 
 
