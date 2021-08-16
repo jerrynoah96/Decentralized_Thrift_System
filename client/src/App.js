@@ -1,23 +1,35 @@
-import logo from './logo.svg';
+import 'bootstrap/dist/css/bootstrap-grid.min.css'
+import 'bootstrap/dist/css/bootstrap-utilities.min.css'
 import './App.css';
+import HomeView from './views/HomeView';
+import AppView from './views/Appview';
+import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
+import { Web3ReactProvider} from '@web3-react/core'
+import { Web3Provider } from '@ethersproject/providers'
+
 
 function App() {
+
+  function getLibrary(provider) {
+    const library = new Web3Provider(provider)
+    library.pollingInterval = 12000
+    return library
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Web3ReactProvider getLibrary={getLibrary}>
+      <Router>
+        <Switch>
+          <Route exact path="/">
+            <HomeView />
+          </Route>
+          <Route path="/app/">
+            <AppView />
+          </Route>
+        </Switch>
+      </Router>
+      </Web3ReactProvider>
     </div>
   );
 }
