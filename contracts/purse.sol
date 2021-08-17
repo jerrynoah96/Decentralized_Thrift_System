@@ -65,12 +65,12 @@ contract PurseContract{
     
     
     
-    address _address_of_token = 0xd9145CCE52D386f254917e481eB44e9943F39138; //address of acceptable erc20 token - basically a stable coin
+    address _address_of_token = 0xf0169620C98c21341aBaAeaFB16c69629Dafc06b; //address of acceptable erc20 token - basically a stable coin
     IERC20 tokenInstance = IERC20(_address_of_token);
     Purse purse; //instantiate struct purse
-    uint256 deposit_amount; //the deployer of each purse will set this amount which every other person to join will deposit
-    uint256 max_member_num;
-    uint256 required_collateral = (deposit_amount * max_member_num);
+    uint256 public deposit_amount; //the deployer of each purse will set this amount which every other person to join will deposit
+    uint256 public max_member_num;
+    uint256 public required_collateral = (deposit_amount * max_member_num);
     uint256 public purseId;
     uint256 public increment_in_membership;
     
@@ -84,8 +84,6 @@ contract PurseContract{
        uint256 _required_collateral = _amount * _max_member;
        required_collateral = _required_collateral;
         require(_collateral == _required_collateral, 'collateral should be deposit amount multiplied by max number of expected member');
-        tokenInstance.transferFrom(_creator, address(this), _amount);
-        tokenInstance.transferFrom(_creator, address(this), _collateral);
         memberToDeposit[_creator] = _amount; //
         memberToCollateral[_creator] = _collateral;
         purseMembers.push(_creator); //push member to array of members
@@ -107,8 +105,7 @@ contract PurseContract{
         require(isPurseMember[msg.sender] == false, 'you are already a member in this purse');
         require(_amount == deposit_amount, 'You cannot deposit above or below the starting amount');
         require(_collateral == required_collateral, 'collateral should be deposit amount multiplied by max expected member');
-        tokenInstance.transferFrom(msg.sender, address(this), _amount);
-        tokenInstance.transferFrom(msg.sender, address(this), _collateral);
+        tokenInstance.transferFrom(msg.sender, address(this), (_collateral + _amount));
          memberToDeposit[msg.sender] = _amount;
         memberToCollateral[msg.sender] = _collateral;
         purseMembers.push(msg.sender); //push member to array of members
@@ -176,7 +173,7 @@ contract PurseContract{
     /* Members will have agreed on the order of recieving funds. the function will expect every member to vote for an address to recieve
     
     */
-     function voteToDisburseFundstoMember(address _memberAddress) public{
+     function voteToDisburseFundstoMember(address _memberAddress) public returns(uint256){
             require(isPurseMember[msg.sender] == true, 'only purse members please');
             require(isPurseMember[_memberAddress] == true, 'This provided address is not a member');
             require(member_has_recieved[_memberAddress] == false, 'this member has recieved a round of contribution already');
@@ -193,9 +190,28 @@ contract PurseContract{
                 tokenInstance.transfer(_memberAddress, contract_total_deposit_balance[address(this)]);
                 
             }
-            
+
+        return votes_for_member_to_recieve_funds[_memberAddress]++;
             //after disbursing funds, reset some mappings to enable members to deposit again for another round
     }
+    
+    function total_contribution()public view returns(uint256){
+        return contract_total_deposit_balance[address(this)];
+    }
+    
+    function total_collaterals() public view returns(uint256){
+        return contract_total_collateral_balance[address(this)];
+    }
+    
+    function view_Members()public view returns(address[]memory){
+        return purse.members;
+    }
+    
+    function check_creation_date()public view returns(uint256){
+        return purse.timeCreated;
+    }
+    
+   
 
     
  
