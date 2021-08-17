@@ -1,0 +1,60 @@
+.purseDashboard {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+}
+
+.purseDashboard .purseDashboard-sidebar {
+  width: 20%;
+  background: var(--river-bed);
+  height: 100%;
+}
+
+.purseDashboard .purseDashboard-sidebar .nav-link-container {
+  margin-top: 2rem;
+  padding: 3rem;
+}
+
+.purseDashboard .purseDashboard-sidebar .nav-link-container .nav {
+  margin: 2rem 0;
+}
+
+.purseDashboard .purseDashboard-sidebar .nav-link-container .nav button {
+  background: none;
+  font-weight: bold;
+}
+
+.purseDashboard .purseDashboard-sidebar .nav-link-container .nav button:hover {
+  color: var(--silver-tree);
+}
+
+.purseDashboard .purseDashboard-sidebar .nav-link-container .active {
+  color: var(--silver-tree);
+}
+
+.purseDashboard .right-container {
+  width: 80%;
+}
+
+.purseDashboard .right-container .header {
+  background: var(--river-bed);
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.purseDashboard .right-container .header .dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.purseDashboard .right-container .header .purse-id {
+  text-align: right;
+  font-size: 1rem;
+  color: var(--french-gray);
+}
+
+.purseDashboard .right-container .main-content {
+  padding: 2rem;
+  margin-top: 0;
+}

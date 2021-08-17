@@ -26,13 +26,3 @@ const PurseCard = ({id, dayCreated, currrentNoOfMembers, amount, open, onDisplay
 }
 
 export default PurseCard;
-
-
-// time created
-//     current_number of member
-//     join button
-//     go to dashbord(only for members)
-//     min-deposit amount
-//     max-member
-//     collaterall amount
-//     purse status

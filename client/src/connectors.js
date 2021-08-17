@@ -8,12 +8,12 @@ const RPC_URL = {
 }
 
 export const injected = new InjectedConnector({
-    supportedChainIds: [3]
+    supportedChainIds: [4]
 })
 
 export const walletconnect = new WalletConnectConnector({
     rpc: {
-        3: RPC_URL[3],
+        3: RPC_URL[4],
         qrcode: true,
         pollingInterval: POLLING_INTERVAL
     }

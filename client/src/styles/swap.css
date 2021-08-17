@@ -91,7 +91,8 @@
   border: 1px solid rgba(198, 196, 203, 0.5);
   border-radius: 1rem;
   color: var(--french-gray);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 @media only screen and (max-width: 768px) {
@@ -118,6 +119,6 @@
   }
 
   .dex-wrapper .swap-btn {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 }

@@ -7,6 +7,7 @@ import {MdExplore} from "react-icons/md"
 import CreatePurse from "../components/createPurse";
 import CreateNewPurseModal from "../components/createNewPurseModal"
 import {BsPlusCircle} from "react-icons/bs"
+import PurseCardsContainer from "../components/purseCardsContainer"
 
 const purseArray = [
     {
@@ -146,6 +147,26 @@ const purseArray = [
 
 const Purses = () => {
 
+
+    const { library, account } = useWeb3React();
+
+    const purseFactoryAddress = "0xEB7031C3eD303ABAbdE60ee414e141fca5Fbe51b";
+
+    
+    useEffect(() => {
+
+        // instantiating the purseFactory contract
+        if (!!library && typeof purseFactoryAddress !== 'undefined') {
+            const purseFactoryAddressInstance = new ethers.Contract(purseFactoryAddress, abi, library);
+        
+            // (async () => {
+            //     const allPurses = await purseFactoryAddressInstance.name();
+            //     console.log(name)
+
+            // })();
+        }
+    },[account, purseFactoryAddress, library])
+
     const [activeTab, setActiveTab] = useState("myPurses")
     const [content, setContent] = useState([]);
     const [presentCreateNewPurseModal, setPresentCreateNewPurseModal] = useState(false)
@@ -219,14 +240,13 @@ const Purses = () => {
                     <li className = {activeTab === "explore" ? "nav-item active-nav-item" : "nav-item"} id = "explore" ref = {explore} onClick = {onChangeTab}><MdExplore className = "nav-icon"/> Explore Purses</li>
                 </ul>
             </div>
-            <div className = "row">
+            
+            <PurseCardsContainer>
                 {!!content.length ?
                     content.map(purse => {
                         return <div className = "col-6" key = {purse.id}><PurseCard id = {purse.id} onDisplayPurseDetailsModal = {onDisplayPurseDetailsModal} dayCreated = {purse.dayCreated} currrentNoOfMembers = {purse.currrentNoOfMembers} amount = {purse.amount} open = {purse.open}/></div>
-                    }) : <CreatePurse setActiveTab = {setActiveTab} onPresentCreateNewPurseModal = {onPresentCreateNewPurseModal} />
-                    
-                }
-            </div>
+                    }) : <CreatePurse setActiveTab = {setActiveTab} onPresentCreateNewPurseModal = {onPresentCreateNewPurseModal} />}
+            </PurseCardsContainer>
                 {presentCreateNewPurseModal && <CreateNewPurseModal dismissModal = {onPresentCreateNewPurseModal} /> }
                 {displayPurseDetailsModal && <PurseDetailsModal onDismissPurseDetailsModal = {onDismissPurseDetailsModal} purseDetails = {currentlyDisplayedPurseDetails} /> }
         </div>
