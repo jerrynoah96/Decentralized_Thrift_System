@@ -54,7 +54,7 @@
   color: #fff;
 }
 
-.dex-wrapper .from-section .from-token-address-input,
+.dex-wrapper .to--section .to-token-address-input,
 .dex-wrapper .to-section select {
   font-size: 1rem;
   font-weight: bold;
@@ -66,13 +66,13 @@
   border-radius: 0.6rem;
   transition: all 0.3s ease-in-out;
 }
-.dex-wrapper .from-section .from-token-address-input {
+.dex-wrapper .to--section .to-token-address-input {
   padding: 0.5rem;
   font-weight: normal;
   text-overflow: ellipsis;
   width: 200%;
 }
-.dex-wrapper .from-section .from-token-address-input::placeholder {
+.dex-wrapper .to--section .to-token-address-input::placeholder {
   color: #aaa;
 }
 .dex-wrapper .from-section select option {

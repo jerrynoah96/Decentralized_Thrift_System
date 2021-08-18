@@ -109,11 +109,11 @@ const Swap = ({handleDisplayWalletModal}) => {
         return false;
     }
 
-    const onChangeFromTokenContractAddress = (e) => {
+    const onChangeToTokenContractAddress = (e) => {
         setSwapData({...swapData, fromTokenContractAddress: e.target.value})
     }
 
-    const onPasteFromTokenContractAddress = (e) => {
+    const onPasteToTokenContractAddress = (e) => {
         const pastedText = e.clipboardData.getData('Text')
         if(/^0x[a-fA-F0-9]{40}$/.test(pastedText))
             return setSwapData({...swapData, fromTokenContractAddress: pastedText})
@@ -177,19 +177,19 @@ const Swap = ({handleDisplayWalletModal}) => {
                 <form onSubmit = {!account ? handleDisplayWalletModal : handleSwap} className = "col-12 col-sm-8 offset-sm-2 col-lg-6 offset-lg-3 p-4 dex-wrapper">
                     <h1>Swap</h1>
                     <div className = "from-section">
-                    <select className = "from-token-button" name = "fromCurrency" value = {swapData.toCurrency} onChange = {onChangeCurrency}>
-                        {toCurrencyList.map(currency=> {
+                    <select className = "from-token-button" name = "fromCurrency" value = {swapData.fromCurrency} onChange = {onChangeCurrency}>
+                        {fromCurrencyList.map(currency=> {
                                 return <option value = {currency} key = {currency}>{currency}</option>
                             })}
                         </select>
-                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount}  value = {swapData.toAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "toAmount" />
+                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount}  value = {swapData.fromAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "toAmount" />
                     </div>
                     <div className = "exchange-arrow-container">
                         <CgArrowsExchangeV className = "exchange-arrow-icon" />
                     </div>
                     <div className = "to-section">
-                        <input className="from-token-address-input" autoComplete="off" autoCorrect="off" onKeyPress = {e => isAllowableEtheruemCharacter(e)} onChange = {onChangeFromTokenContractAddress} onPaste = {(e) => onPasteFromTokenContractAddress(e)} value = {swapData.fromTokenContractAddress} type="text" placeholder="Paste token address" name = "fromTokenContractAddress" />
-                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount} value = {swapData.fromAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "fromAmount" />
+                        <input className="to-token-address-input" autoComplete="off" autoCorrect="off" onKeyPress = {e => isAllowableEtheruemCharacter(e)} onChange = {onChangeToTokenContractAddress} onPaste = {(e) => onPasteToTokenContractAddress(e)} value = {swapData.toTokenContractAddress} type="text" placeholder="Paste token address" name = "fromTokenContractAddress" />
+                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount} value = {swapData.toAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "fromAmount" />
                     </div>
                     <button type = "submit" className = "swap-btn">{account ? "Swap" : "Connect Wallet"}</button>
                 </form>              
