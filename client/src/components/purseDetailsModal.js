@@ -3,7 +3,7 @@ import PurseCard from "./purseCard"
 import {HiOutlineArrowCircleRight} from "react-icons/hi"
 import Backdrop from "../components/Backdrop"
 
-const PurseDetailsModal = ({onDismissPurseDetailsModal, purseDetails}) => {
+const PurseDetailsModal = ({onDismissPurseDetailsModal, purseDetails, joinPurse}) => {
     return(
         <>
             <Backdrop dismissModal = {onDismissPurseDetailsModal} />
@@ -37,7 +37,7 @@ const PurseDetailsModal = ({onDismissPurseDetailsModal, purseDetails}) => {
                         <p className = "note-text">By Clicking the "JOIN PURSE" button, You are sending {purseDetails.collateralAmount} DAI as collateral and {purseDetails.amount} DAI for the purse amount which makes it total of {Number(purseDetails.collateralAmount) + Number(purseDetails.amount)} DAI</p>
                     </div>
                     <div className = "joinPurseButton-container">
-                        <button className = "joinPurseButton">JOIN PURSE</button>
+                        <button className = "joinPurseButton" onClick = {joinPurse}>JOIN PURSE</button>
                     </div>
                 </div>
             </div>

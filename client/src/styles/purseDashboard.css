@@ -4,6 +4,14 @@
   display: flex;
 }
 
+.back-btn-container {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
 .purseDashboard .purseDashboard-sidebar {
   width: 20%;
   background: var(--river-bed);

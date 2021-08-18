@@ -51,7 +51,7 @@ const AppHeader = ({handleDisplayWalletModal}) => {
                 </ul>
             </nav>
             <div className = "user-section">
-                {active ? <UserAccount balance = {balance} address = {account} /> : <button onClick = {handleDisplayWalletModal}>Connect wallet</button>}
+                {active ? <UserAccount balance = {parseFloat(balance).toFixed(2)} address = {account} /> : <button onClick = {handleDisplayWalletModal}>Connect wallet</button>}
                 
             </div>
         </header>

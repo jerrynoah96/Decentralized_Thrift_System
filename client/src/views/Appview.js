@@ -9,6 +9,7 @@ import PurseDasboard from "../pages/purseDashboard"
 import WalletsModal from "../components/walletsModal"
 import {useWeb3React} from '@web3-react/core'
 import { useEagerConnect, useInactiveListener } from '../hooks'
+import PurseContextProvider from "../context/purseContext"
 
 
 // function getErrorMessage(error) {
@@ -121,17 +122,19 @@ const AppView = () => {
 
               
                 {!onDashboard && <AppHeader handleDisplayWalletModal = {handleDisplayWalletModal} />}
-                <Switch>
-                    <Route exact path = "/app/swap">
-                        <Swap handleDisplayWalletModal = {handleDisplayWalletModal} />
-                    </Route>
-                    <Route exact path = "/app/purses">
-                        <Purses />
-                    </Route>
-                    <Route exact path = "/app/purse/:id">
-                        <PurseDasboard />
-                    </Route>
-                </Switch>
+                <PurseContextProvider>
+                    <Switch>
+                        <Route exact path = "/app/swap">
+                            <Swap handleDisplayWalletModal = {handleDisplayWalletModal} />
+                        </Route>
+                        <Route exact path = "/app/purses">
+                            <Purses />
+                        </Route>
+                        <Route exact path = "/app/purse/:id">
+                            <PurseDasboard />
+                        </Route>
+                    </Switch>
+                </PurseContextProvider>
                 
                 {showWalletModal && <WalletsModal dismissModal = {handleDisplayWalletModal} />}
             

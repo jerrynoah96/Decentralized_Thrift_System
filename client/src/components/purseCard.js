@@ -4,7 +4,7 @@ const PurseCard = ({id, dayCreated, currrentNoOfMembers, amount, open, onDisplay
     return(
         <div className = "purseCard" id = {id} onClick = {onDisplayPurseDetailsModal}>
             <div className = "purse-card-header">
-                <h1 className = "purse-id">{id}</h1>
+                <h1 className = "purse-id">{`${id.substr(0,6)}...${id.substr(id.length-4, id.length)}`}</h1>
                 {open ? <TiLockOpenOutline className = "status-icon open"/> : <TiLockClosedOutline className = "status-icon closed"/> }
             </div>
             <div className = "purse-card-body">

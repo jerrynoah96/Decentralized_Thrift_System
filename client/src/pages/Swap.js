@@ -2,8 +2,7 @@ import {useState, useEffect} from "react"
 import "../styles/swap.css"
 import {CgArrowsExchangeV} from "react-icons/cg"
 import { useWeb3React } from '@web3-react/core'
-import {ethers} from "ethers";
-import abi from "../ABI/abi.json";
+// import {ethers} from "ethers";
 
 
 
@@ -11,21 +10,21 @@ const Swap = ({handleDisplayWalletModal}) => {
 
     const { library, account } = useWeb3React();
 
-    const address = "0x5826F074F9b3CD2156195c7A69ff03b3BE3043ed";
-    // contract interaction example
-    useEffect(() => {
+    // const address = "0x5826F074F9b3CD2156195c7A69ff03b3BE3043ed";
+    // // contract interaction example
+    // useEffect(() => {
 
-        // experimenting contract interaction
-        if (!!library && typeof address !== 'undefined') {
-            const contract = new ethers.Contract(address, abi, library);
+    //     // experimenting contract interaction
+    //     if (!!library && typeof address !== 'undefined') {
+    //         const contract = new ethers.Contract(address, abi, library);
         
-            (async () => {
-                const name = await contract.name();
-                console.log(name)
+    //         (async () => {
+    //             const name = await contract.name();
+    //             console.log(name)
 
-            })();
-        }
-    },[account, address, library])
+    //         })();
+    //     }
+    // },[account, address, library])
 
 
     const [swapData, setSwapData] = useState({

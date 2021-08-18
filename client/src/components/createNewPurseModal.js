@@ -1,91 +1,91 @@
-import {useState} from "react"
+// import {useState} from "react"
 import "../styles/createNewPurseModal.css";
 import {AiOutlineClose} from "react-icons/ai"
 import Backdrop from "../components/Backdrop"
 
-const CreateNewPurseModal = ({dismissModal}) => {
+const CreateNewPurseModal = ({newPurseData, setNewPurseData, dismissModal, onCreateNewPurse, onChangeFrequency, onChangeNumberOfMember, onChangeAmount, isNumberKey, isMoneyKey}) => {
 
-    const [newPurseData, setNewPurseData] = useState({
-        amount: "0",
-        numberOfMembers: 1,
-        frequency: 1,
-        collateral: "0"
-    })
+    // const [newPurseData, setNewPurseData] = useState({
+    //     amount: "0",
+    //     numberOfMembers: 1,
+    //     frequency: 1,
+    //     collateral: "0"
+    // })
 
-    const isMoneyKey = (e) => {
+    // const isMoneyKey = (e) => {
 
-        const charCode = (e.which) ? e.which : e.keyCode;
+    //     const charCode = (e.which) ? e.which : e.keyCode;
 
-        if(charCode >= 48 && charCode <= 57) {
+    //     if(charCode >= 48 && charCode <= 57) {
     
                     
-            if(charCode === 48 && newPurseData.amount === "0") { // if the user tries to enter leading zeros continuosly
-                e.preventDefault()
-                return false;
-            }
+    //         if(charCode === 48 && newPurseData.amount === "0") { // if the user tries to enter leading zeros continuosly
+    //             e.preventDefault()
+    //             return false;
+    //         }
         
-            return true;
-        } else if(charCode === 46 && !!newPurseData.amount && newPurseData.amount.indexOf(".") === -1) { //allow the "." character only if it's not there before
+    //         return true;
+    //     } else if(charCode === 46 && !!newPurseData.amount && newPurseData.amount.indexOf(".") === -1) { //allow the "." character only if it's not there before
             
-            return true;
+    //         return true;
     
-        }
-        else {
-            e.preventDefault();
-            return false;
-        }
-    }
+    //     }
+    //     else {
+    //         e.preventDefault();
+    //         return false;
+    //     }
+    // }
 
-    const isNumberKey = (e) => {
-        const charCode = (e.which) ? e.which : e.keyCode;
+    // const isNumberKey = (e) => {
+    //     const charCode = (e.which) ? e.which : e.keyCode;
 
-        if(charCode >= 48 && charCode <= 57)
-            return true;
+    //     if(charCode >= 48 && charCode <= 57)
+    //         return true;
 
-        e.preventDefault()
-        return false
+    //     e.preventDefault()
+    //     return false
         
 
-    }
+    // }
 
-    const onChangeAmount = (e) => {
-        const value = e.target.value;
-        if(newPurseData.amount === "0") {
+    // const onChangeAmount = (e) => {
+    //     const value = e.target.value;
+    //     if(newPurseData.amount === "0") {
 
-            const collateral = parseFloat(value.charAt(value.length-1)) * Number(newPurseData.numberOfMembers);
-            setNewPurseData({...newPurseData, amount: value.charAt(value.length-1), collateral: collateral.toString()})
-            return;
+    //         const collateral = parseFloat(value.charAt(value.length-1)) * Number(newPurseData.numberOfMembers);
+    //         setNewPurseData({...newPurseData, amount: value.charAt(value.length-1), collateral: collateral.toString()})
+    //         return;
 
-        }
-        const collateral = parseFloat(value) || 0 * Number(newPurseData.numberOfMembers);
-        setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()});
+    //     }
+    //     const collateral = parseFloat(value) || 0 * Number(newPurseData.numberOfMembers);
+    //     setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()});
         
-    }
+    // }
 
-    const onChangeNumberOfMember = (e) => {
-        const value = e.target.value;
-        if(value === "0" && newPurseData.numberOfMembers === "") {
+    // const onChangeNumberOfMember = (e) => {
+    //     const value = e.target.value;
+    //     if(value === "0" && newPurseData.numberOfMembers === "") {
 
-            const collateral = parseFloat(newPurseData.amount) * Number(value.charAt(value.length-1)) || 0;
-            setNewPurseData({...newPurseData, amount: value.charAt(value.length-1), collateral: collateral.toString()})
-            return
-        } 
+    //         const collateral = parseFloat(newPurseData.amount) * Number(value.charAt(value.length-1)) || 0;
+    //         setNewPurseData({...newPurseData, amount: value.charAt(value.length-1), collateral: collateral.toString()})
+    //         return
+    //     } 
 
-        const collateral = parseFloat(newPurseData.amount) * Number(value);
-        setNewPurseData({...newPurseData, numberOfMembers: value, collateral: collateral.toString()})
-    }
+    //     const collateral = parseFloat(newPurseData.amount) * Number(value);
+    //     setNewPurseData({...newPurseData, numberOfMembers: value, collateral: collateral.toString()})
+    // }
 
-    const onChangeFrequency = (e) => {
-        const value = e.target.value;
-        if(value === "0" && newPurseData.frequency === "") return
+    // const onChangeFrequency = (e) => {
+    //     const value = e.target.value;
+    //     if(value === "0" && newPurseData.frequency === "") return
 
-        setNewPurseData({...newPurseData, frequency: value})
-    }
+    //     setNewPurseData({...newPurseData, frequency: value})
+    // }
 
-    const onCreateNewPurse = (e) => {
-        e.preventDefault()
-        alert("you don create new purse!")
-    }
+    // const onCreateNewPurse = (e) => {
+    //     e.preventDefault()
+    //     alert("you don create new purse!")
+    // }
 
     return(
         <>

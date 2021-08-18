@@ -4,7 +4,7 @@ import {MdToday} from "react-icons/md"
 import {IoPeopleCircle} from "react-icons/io5"
 import {GiMoneyStack} from "react-icons/gi"
 
-const DashboardOverview = () => {
+const DashboardOverview = ({maxMember, availableMember, dayCreated, totalCollateral}) => {
     const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 
@@ -24,8 +24,8 @@ const DashboardOverview = () => {
             indexLabelFontSize: 16,
             indexLabel: "{label} - {y}",
             dataPoints: [
-                { y: 2, label: "Available Members" },
-                { y: 3, label: "Members yet to join" },
+                { y: Number(availableMember), label: "Available Members" },
+                { y: Number(maxMember) - Number(availableMember), label: "Members yet to join" },
             ]
         }],
         backgroundColor: "transparent",
@@ -45,7 +45,7 @@ const DashboardOverview = () => {
                     </div>
                     <div className = "details-container">
                         <p className = "key">Created on</p>
-                        <p className = "value">July 7 2021</p>
+                        <p className = "value">{dayCreated}</p>
                     </div>
                 </div>
                 <div className = "members">
@@ -54,7 +54,7 @@ const DashboardOverview = () => {
                     </div>
                     <div className = "details-container">
                         <p className = "key">Members</p>
-                        <p className = "value">4</p>
+                        <p className = "value">{availableMember}</p>
                     </div>
                 </div>
                 <div className = "total-collateral">
@@ -63,7 +63,7 @@ const DashboardOverview = () => {
                     </div>
                     <div className = "details-container">
                         <p className = "key">Total Collateral</p>
-                        <p className = "value">5000 DAI</p>
+                        <p className = "value">{totalCollateral} DAI</p>
                     </div>
                 </div>                
             </div>
