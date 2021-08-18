@@ -31,6 +31,26 @@ interface IERC20 {
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+interface IBentoxBox{
+    function balanceOf(address,address) view external returns(uint256);
+    function deposit(
+        IERC20 token_,
+        address from,
+        address to,
+        uint256 amount,
+        uint256 share
+    ) external payable returns (uint256 amountOut, uint256 shareOut);
+    
+    function withdraw(
+        IERC20 token_,
+        address from,
+        address to,
+        uint256 amount,
+        uint256 share
+    ) external returns (uint256 amountOut, uint256 shareOut);
+    
+}
+
 
 contract PurseContract{
     
@@ -43,8 +63,9 @@ contract PurseContract{
         uint256 voteToClose;
         uint256 voteToReOpen;
         uint256 voteToTerminate;
+        uint256 time_interval; 
         uint256 timeCreated;
-        
+              
         
     }
     
@@ -73,12 +94,16 @@ contract PurseContract{
     uint256 public required_collateral = (deposit_amount * max_member_num);
     uint256 public purseId;
     uint256 public increment_in_membership;
+    address admin = 0x9dc821bc9B379a002E5bD4A1Edf200c19Bc5F9CA;
+    
+    //instantiate IBentoxBox
+    IBentoxBox bentoBoxInstance = IBentoxBox(0xF5BCE5077908a1b7370B9ae04AdC565EBd643966);
     
     //events
     event PurseCreated(address _creator, uint256 starting_amount, uint256 max_members, uint256 _time_created);
     
     
-    constructor(address _creator, uint256 _amount, uint256 _collateral, uint256 _max_member) payable {
+    constructor(address _creator, uint256 _amount, uint256 _collateral, uint256 _max_member, uint256 time_interval) payable {
         deposit_amount=_amount;//set this amount to deposit_amount
         max_member_num=_max_member; //set max needed member
        uint256 _required_collateral = _amount * _max_member;
@@ -88,6 +113,7 @@ contract PurseContract{
         memberToCollateral[_creator] = _collateral;
         purseMembers.push(_creator); //push member to array of members
         purse.members = purseMembers; // set array of members in Purse struct to array of members
+        purse.time_interval = time_interval;
         memberToPurse[_creator] = purse; // map msg.sender to purse
         isPurseMember[_creator] = true; //set msg.sender to be true as a member of the purse already
         purse.purseState = PurseState.Open; //set purse state to Open
@@ -165,7 +191,7 @@ contract PurseContract{
     
     
     //this function is after the first round, at this point, user doesnt need to deposit collateral
-    function deposit(uint256 _amount) public {
+    function depositFunds(uint256 _amount) public {
         require(isPurseMember[msg.sender] == true, 'only purse members please');
         
     }
@@ -194,7 +220,55 @@ contract PurseContract{
         return votes_for_member_to_recieve_funds[_memberAddress]++;
             //after disbursing funds, reset some mappings to enable members to deposit again for another round
     }
+
+//any member can call this function
+    function deposit_funds_to_bentoBox()public {
+        require(isPurseMember[msg.sender] == true, 'only purse members please');
+        require(purse.members.length == max_member_num, 'members to be in purse are yet to be completed, so collaterals are not complete');
+        bentoBoxInstance.deposit(tokenInstance,
+        address(this), 
+        address(this), 
+        contract_total_collateral_balance[address(this)], 
+        0);
+        
+        contract_total_collateral_balance[address(this)] = 0;
+    }
     
+    function bentoBox_balance()public view returns(uint256) {
+       uint256 bento_box_balance = bentoBoxInstance.balanceOf(_address_of_token, address(this));
+       return bento_box_balance;
+    }
+
+//any member can call this function
+    function withdraw_funds_from_bentoBox()public{
+        require(block.timestamp >= (purse.time_interval * max_member_num), 'Not yet time for withdrawal');
+  //      require(
+//        for(uint256 i=0; i<purse.members.length; i++){
+  //          member_has_recieved[purse.members[i]] == true;
+//        }, 'Not all members have recieved thier round of contribution'
+  //          );
+        uint256 bento_box_balance = bentoBoxInstance.balanceOf(_address_of_token, address(this));
+        //bentoBox withdraw functiosn returns 2 values, in this cares, shares will be what has the entire values- our collateral deposits plus 
+        uint256 shares;
+        uint256 amount;
+        (amount, shares) = bentoBoxInstance.withdraw(tokenInstance, address(this), address(this), 0, bento_box_balance);
+        //calculate yields
+        uint256 yields = shares - (required_collateral * max_member_num);  //shares will remain total collateral at this point
+        //20% of yields goes to purseFactory admin
+        uint256 yields_to_admin =yields * 20/100;
+        tokenInstance.transfer(admin, yields_to_admin);
+        
+        //yields balance  shared equally amongst members
+        uint256 yields_to_members = yields - yields_to_admin;
+        //share remaining yields equally among members and return collaterals
+        uint256 individual_yields = yields_to_members/max_member_num;
+        uint256 individual_collateral_returns = required_collateral;
+        for(uint256 i=0; i<purse.members.length; i++){
+            tokenInstance.transfer(purse.members[i], (individual_yields + individual_collateral_returns));
+        }
+
+    }
+
     function total_contribution()public view returns(uint256){
         return contract_total_deposit_balance[address(this)];
     }
@@ -209,6 +283,14 @@ contract PurseContract{
     
     function check_creation_date()public view returns(uint256){
         return purse.timeCreated;
+    }
+    
+    function purse_details()public view returns(Purse memory){
+        return purse;
+    }
+    
+    function check_time_interval()public view returns(uint256){
+        return purse.time_interval;
     }
     
    
