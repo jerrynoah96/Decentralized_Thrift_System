@@ -48,6 +48,19 @@ contract SwapContract{
         
     }
     
+ function swapEthForToken(uint256 ethAmount, address tokenAddress) public payable {
+     require(ethAmount == msg.value, 'kindly pass in right amount of eth');
+
+    require(ethAmount <= msg.sender.balance, "Insufficient Eth Balance");
+    
+    address[] memory path = new address[](2);
+    path[0] = routerInstance.WETH();
+    path[1] = tokenAddress;
+
+    
+    routerInstance.swapExactETHForTokens{value: msg.value}(ethAmount, path, msg.sender, (block.timestamp + 60));
+  }
+    
     
     
     function whiteList_coin(address _token) public {

@@ -94,6 +94,7 @@ contract PurseContract{
     uint256 public required_collateral = (deposit_amount * max_member_num);
     uint256 public purseId;
     uint256 public increment_in_membership;
+    uint256 public num_of_members_who_has_recieved_funds;
     address admin = 0x9dc821bc9B379a002E5bD4A1Edf200c19Bc5F9CA;
     
     //instantiate IBentoxBox
@@ -214,6 +215,7 @@ contract PurseContract{
                 //disburse tokens in mapping - contract_total_deposit_balance to _memberAddress
                 
                 tokenInstance.transfer(_memberAddress, contract_total_deposit_balance[address(this)]);
+                num_of_members_who_has_recieved_funds++;
                 
             }
 
@@ -241,7 +243,8 @@ contract PurseContract{
 
 //any member can call this function
     function withdraw_funds_from_bentoBox()public{
-        require(block.timestamp >= (purse.time_interval * max_member_num), 'Not yet time for withdrawal');
+    //    require(block.timestamp >= (purse.time_interval * max_member_num), 'Not yet time for withdrawal');
+    require(num_of_members_who_has_recieved_funds == purse.members.length, 'Not yet time, not all members have recieved a round of contribution');
   //      require(
 //        for(uint256 i=0; i<purse.members.length; i++){
   //          member_has_recieved[purse.members[i]] == true;
