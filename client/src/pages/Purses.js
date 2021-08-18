@@ -15,6 +15,7 @@ import purseFactoryAbi from "../ABI/purseFactoryAbi.json";
 import purseAbi from "../ABI/purseAbi.json"
 import tokenAbi from "../ABI/tokenAbi.json"
 import {PurseContext} from "../context/purseContext";
+import PurseCardSkeleton from "../components/purseCardSkeleton";
 
 
 const Purses = () => {
@@ -25,8 +26,9 @@ const Purses = () => {
     const history = useHistory();
 
     const {purseArray, setPurseArray} = useContext(PurseContext)
+    const [displayPurseSkeletons, setDisplayPurseSkeletons] = useState(true)
 
-    const purseFactoryAddress = "0xEB7031C3eD303ABAbdE60ee414e141fca5Fbe51b";
+    const purseFactoryAddress = "0x7239Ed91837Fd756B6C228B3e8A7a9d4A411eb4f";
     const tokenAddress = "0xf0169620C98c21341aBaAeaFB16c69629Dafc06b"
 
     const [activeTab, setActiveTab] = useState("myPurses")
@@ -44,7 +46,7 @@ const Purses = () => {
 
     const [newPurseData, setNewPurseData] = useState({
         amount: "0",
-        numberOfMembers: 1,
+        numberOfMembers: 2,
         frequency: 1,
         collateral: "0"
     })
@@ -89,13 +91,12 @@ const Purses = () => {
     const onChangeAmount = (e) => {
         const value = e.target.value;
         if(newPurseData.amount === "0") {
-
             const collateral = parseFloat(value.charAt(value.length-1)) * Number(newPurseData.numberOfMembers);
             setNewPurseData({...newPurseData, amount: value.charAt(value.length-1), collateral: collateral.toString()})
             return;
 
         }
-        const collateral = parseFloat(value) || 0 * Number(newPurseData.numberOfMembers);
+        const collateral = (parseFloat(value) * Number(newPurseData.numberOfMembers)) || 0;
         setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()});
         
     }
@@ -106,11 +107,11 @@ const Purses = () => {
         if(value === "0" && newPurseData.numberOfMembers === "") {
 
             const collateral = parseFloat(newPurseData.amount) * Number(value.charAt(value.length-1)) || 0;
-            setNewPurseData({...newPurseData, amount: value.charAt(value.length-1), collateral: collateral.toString()})
+            setNewPurseData({...newPurseData, numberOfMembers: value.charAt(value.length-1), collateral: collateral.toString()})
             return
         } 
 
-        const collateral = parseFloat(newPurseData.amount) * Number(value);
+        const collateral = (parseFloat(newPurseData.amount) * Number(value) || 0);
         setNewPurseData({...newPurseData, numberOfMembers: value, collateral: collateral.toString()})
     }
 
@@ -128,14 +129,21 @@ const Purses = () => {
     
         const dateArray = date.toString().split(' ');
     
-        return `${dateArray[2]} ${dateArray[1]} ${dateArray[4].substr(0, 5)}`;
+        return `${dateArray[2]} ${dateArray[1]} ${dateArray[3]}`;
         
     }
 
     const onCreateNewPurse = async (e) => {
         e.preventDefault()
+
+        if(!Number(newPurseData.amount)) {
+            return alert("amount must be greater than 0")
+        }
+        if(Number(newPurseData.numberOfMembers) < 2) {
+            return alert("number of members must be equal to or greater than 2")
+        }
        
-        await createPurse(newPurseData.amount, newPurseData.collateral, newPurseData.numberOfMembers);
+        await createPurse(newPurseData.amount, newPurseData.collateral, newPurseData.numberOfMembers, newPurseData.frequency);
     }
 
     
@@ -151,6 +159,8 @@ const Purses = () => {
                
                 const purses = []
 
+               if(!allPurseAddress.length) return setDisplayPurseSkeletons(false);
+
                 allPurseAddress.forEach(purseAddress => {
                     const purseContractInstance = new ethers.Contract(purseAddress, purseAbi, library);
 
@@ -160,20 +170,27 @@ const Purses = () => {
                         purseContractInstance.max_member_num(),
                         purseContractInstance.required_collateral(),
                         purseContractInstance.total_contribution(),
-                        purseContractInstance.view_Members()
+                        purseContractInstance.view_Members(),
+                        purseContractInstance.bentoBox_balance(),
+                        purseContractInstance.check_time_interval()
                     ]).then(data => {
                         purses.push({
                             id: purseAddress,
                             dayCreated: convertCreatedDay(data[0]),
                             members: data[5],
-                            maxMember: data[2],
+                            maxMember: data[2].toString(),
                             amount: ethers.utils.formatEther(data[1]),
                             collateral: ethers.utils.formatEther(data[3]),
                             totalContrbution: ethers.utils.formatEther(data[4]),
-                            open: data[5].length < data[2]
+                            open: data[5].length < data[2],
+                            frequency: data[7].toString(),
+                            bentoBoxBal: data[6].toString()
                         })
 
-                        if(purses.length === allPurseAddress.length) setPurseArray(purses)
+                        if(purses.length === allPurseAddress.length)  {
+                            setPurseArray(purses);
+                            setDisplayPurseSkeletons(false);
+                        }
                     })
 
                     
@@ -184,27 +201,24 @@ const Purses = () => {
     }, [library])
 
 
-    const approve = async (adress, amount) => {
+    const approve = async (address, amount) => {
         if (!!library && typeof tokenAddress !== 'undefined') {
 
             const amountWEI = ethers.utils.parseEther(amount.toString())
 
             const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, library.getSigner());
 
-           const trx = await tokenInstance.approve(adress, amountWEI);
-           console.log("dddddddd: ", trx);
+            const app = await tokenInstance.approve(address, amountWEI);
 
-        //    await trx.wait(receipt => console.log("xxxxxxx: ", receipt))
-
+            await app.wait();
         }
     }
 
 
-    const createPurse = async (contributionAmount, collateral, maxMember) => {
+    const createPurse = async (contributionAmount, collateral, maxMember, frequency) => {
 
-        if(!contributionAmount && !collateral && !maxMember) return;
+        if(!contributionAmount || !collateral || !maxMember || !frequency) return;
 
-        
 
         if (!library && typeof purseFactoryAddress == 'undefined') return;
 
@@ -212,11 +226,13 @@ const Purses = () => {
 
         const collateralWEI = ethers.utils.parseEther(collateral.toString())
 
+
         try {
+
             await approve(purseFactoryAddress, Number(contributionAmount) + Number(collateral))
-            
+
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library.getSigner());
-            await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember));
+            await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency);
         }catch(err) {
             console.log(err)
         }
@@ -232,8 +248,9 @@ const Purses = () => {
         const collateralWEI = ethers.utils.parseEther(currentlyDisplayedPurseDetails.collateral.toString())
         try {
             await approve(currentlyDisplayedPurseDetails.id, Number(currentlyDisplayedPurseDetails.amount) + Number(currentlyDisplayedPurseDetails.collateral))
-                const purseContractInstance = new ethers.Contract(currentlyDisplayedPurseDetails.id, purseAbi, library.getSigner());
-                await purseContractInstance.joinPurse(contributionAmountWEI, collateralWEI)
+          
+            const purseContractInstance = new ethers.Contract(currentlyDisplayedPurseDetails.id, purseAbi, library.getSigner());
+            await purseContractInstance.joinPurse(contributionAmountWEI, collateralWEI)
         } catch(err) {
             console.log(err)
         }
@@ -311,10 +328,9 @@ const Purses = () => {
             </div>
 
             <PurseCardsContainer>
-                {!!content.length ?
-                    content.map(purse => {
-                        return <div className="col-6" key={purse.id}><PurseCard id={purse.id} onDisplayPurseDetailsModal={onDisplayPurseDetailsModal} dayCreated={purse.dayCreated} currrentNoOfMembers={purse.members.length} amount={purse.amount} open={purse.open} /></div>
-                    }) : <CreatePurse setActiveTab={setActiveTab} onPresentCreateNewPurseModal={onPresentCreateNewPurseModal} />}
+
+                {displayPurseSkeletons ? Array(6).fill().map((element, index) => <div key = {index} className = "col-6"><PurseCardSkeleton /></div>) : !!content.length ? content.map(purse =><div className="col-6" key={purse.id}><PurseCard id={purse.id} onDisplayPurseDetailsModal={onDisplayPurseDetailsModal} dayCreated={purse.dayCreated} currrentNoOfMembers={purse.members.length} amount={purse.amount} open={purse.open} /></div>) : <CreatePurse setActiveTab={setActiveTab} onPresentCreateNewPurseModal={onPresentCreateNewPurseModal} />}
+                
             </PurseCardsContainer>
             {presentCreateNewPurseModal && <CreateNewPurseModal
             newPurseData = {newPurseData}

@@ -2,6 +2,9 @@
   height: 100vh;
   width: 100%;
   display: flex;
+  position: fixed;
+  top: 0;
+  right: 0;
 }
 
 .back-btn-container {
@@ -16,6 +19,8 @@
   width: 20%;
   background: var(--river-bed);
   height: 100%;
+  left: 0;
+  top: 0;
 }
 
 .purseDashboard .purseDashboard-sidebar .nav-link-container {
@@ -42,6 +47,10 @@
 
 .purseDashboard .right-container {
   width: 80%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .purseDashboard .right-container .header {
@@ -49,13 +58,41 @@
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  vertical-align: bottom;
 }
 .purseDashboard .right-container .header .dashboard-title {
   font-size: 1.5rem;
   font-weight: 900;
 }
 
+.purseDashboard .right-container .header .info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.purseDashboard .right-container .header .info .bentoBox-bal {
+  margin-top: 1rem;
+  color: #fff;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.to-bentoBox {
+  background-image: linear-gradient(
+    to right,
+    rgb(1, 110, 218),
+    rgb(217, 0, 192)
+  );
+  padding: 0.6rem 1rem;
+  border-radius: 0.4rem;
+}
+
+.bento-logo {
+  width: 50px;
+}
 .purseDashboard .right-container .header .purse-id {
   text-align: right;
   font-size: 1rem;
@@ -63,6 +100,5 @@
 }
 
 .purseDashboard .right-container .main-content {
-  padding: 2rem;
-  margin-top: 0;
+  height: 100%;
 }

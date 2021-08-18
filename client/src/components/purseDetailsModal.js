@@ -4,13 +4,14 @@ import {HiOutlineArrowCircleRight} from "react-icons/hi"
 import Backdrop from "../components/Backdrop"
 
 const PurseDetailsModal = ({onDismissPurseDetailsModal, purseDetails, joinPurse}) => {
+    
     return(
         <>
             <Backdrop dismissModal = {onDismissPurseDetailsModal} />
             <div className = "purseModalDetails">
                 <HiOutlineArrowCircleRight className = "purseModalDetails-close-icon" onClick = {onDismissPurseDetailsModal}/>
                 <div className = "purseModalDetails-body">
-                    <PurseCard id = {purseDetails.id} dayCreated = {purseDetails.dayCreated} currrentNoOfMembers = {purseDetails.currrentNoOfMembers} amount = {purseDetails.amount} open = {purseDetails.open}/>
+                    <PurseCard id = {purseDetails.id} dayCreated = {purseDetails.dayCreated} currrentNoOfMembers = {purseDetails.members.length} amount = {purseDetails.amount} open = {purseDetails.open} />
 
                     <div className = "details-container">
                         <div className = "details amount">
@@ -23,21 +24,21 @@ const PurseDetailsModal = ({onDismissPurseDetailsModal, purseDetails, joinPurse}
                         </div>
                         <div className = "details maxMember">
                             <p className = "puresDetail-key">Max Members</p>
-                            <p className = "puresDetail-value">{purseDetails.maxNumberOfMember}</p>
+                            <p className = "puresDetail-value">{purseDetails.maxMember}</p>
                         </div>
                         <div className = "details maxMember">
                             <p className = "puresDetail-key">Current Members</p>
-                            <p className = "puresDetail-value">{purseDetails.currrentNoOfMembers}</p>
+                            <p className = "puresDetail-value">{purseDetails.members.length}</p>
                         </div>
                     </div>
 
                     <div className = "notice-container">
                         <h2 className = "note-header">Note:</h2>
-                        <p className = "note-text">You are to deposite a collateral of {purseDetails.collateralAmount} DAI which will be put in yield farming. You can withdraw this collateral plus the yield to your wallet immediately after everyone have gotten their funds from the purse</p>
-                        <p className = "note-text">By Clicking the "JOIN PURSE" button, You are sending {purseDetails.collateralAmount} DAI as collateral and {purseDetails.amount} DAI for the purse amount which makes it total of {Number(purseDetails.collateralAmount) + Number(purseDetails.amount)} DAI</p>
+                        <p className = "note-text">You are to deposite a collateral of {purseDetails.collateral} DAI which will be put in yield farming. You can withdraw this collateral plus the yield to your wallet immediately after everyone have gotten their funds from the purse</p>
+                        <p className = "note-text">By Clicking the "JOIN PURSE" button, You are sending {purseDetails.collateral} DAI as collateral and {purseDetails.amount} DAI for the purse amount which makes it total of {Number(purseDetails.collateral) + Number(purseDetails.amount)} DAI</p>
                     </div>
                     <div className = "joinPurseButton-container">
-                        <button className = "joinPurseButton" onClick = {joinPurse}>JOIN PURSE</button>
+                        {purseDetails.open ? <button className = "joinPurseButton" onClick = {joinPurse}>JOIN PURSE</button> : <p className = "closed-purse-notice">this purse is now closed</p>}
                     </div>
                 </div>
             </div>

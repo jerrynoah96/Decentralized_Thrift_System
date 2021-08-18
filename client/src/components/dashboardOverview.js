@@ -67,6 +67,10 @@ const DashboardOverview = ({maxMember, availableMember, dayCreated, totalCollate
                     </div>
                 </div>                
             </div>
+            <div className = "bento-info">
+                <p>Don't know BentoBox? <img className = "bento-info-logo" alt = "bentBox logo" src = "https://raw.githubusercontent.com/sushiswap/sushi-content/master/products/bento-color.png" /></p>
+                <a href = "https://app.sushi.com/bentobox">Learn more about BentoBox</a>
+            </div>
         </div>
     );
 }

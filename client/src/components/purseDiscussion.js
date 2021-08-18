@@ -1,3 +1,4 @@
+import {AiOutlineSend} from "react-icons/ai"
 import "../styles/purseDiscussion.css"
 const purseDiscussion = () => {
     return(
@@ -6,8 +7,8 @@ const purseDiscussion = () => {
                 <p className = "no-discussion">nothing here yet. be the first to chat with the rest of the purse members"</p>
             </div>
             <form className = "send-message-wrapper">
-                <input type = "text" className = "message-input" />
-                <button className = "send-message-input">SEND</button>
+                <input type = "text" autofocus className = "message-input" />
+                <button className = "send-message-input"><AiOutlineSend /></button>
             </form>
         </div>
     );

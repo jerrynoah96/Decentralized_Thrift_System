@@ -69,3 +69,23 @@
   font-weight: 500;
   color: var(--ebony-clay);
 }
+
+.bento-info {
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.bento-info p {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.bento-info-logo {
+  width: 80px;
+}
+
+.bento-info a {
+  font-weight: 700;
+  color: var(--silver-tree);
+}
