@@ -79,6 +79,7 @@ contract PurseContract{
     
     //events
     event PurseCreated(address _creator, uint256 starting_amount, uint256 max_members, uint256 _time_created);
+    event MemberVotedFor(address _member, uint256 _currentVotesFor);
     
     
     constructor(address _creator, uint256 _amount, uint256 _collateral, uint256 _max_member, uint256 time_interval) payable {
@@ -198,6 +199,7 @@ contract PurseContract{
 
         return votes_for_member_to_recieve_funds[_memberAddress]++;
             //after disbursing funds, reset some mappings to enable members to deposit again for another round
+           
     }
 
 //any member can call this function
@@ -273,11 +275,14 @@ contract PurseContract{
         return purse.time_interval;
     }
     
+    function view_Votes_for_member(address _member)public view returns(uint256){
+        return votes_for_member_to_recieve_funds[_member];
+    }
+    
+    function view_if_member_has_recieved_fund(address _member)public view returns(bool){
+        return member_has_recieved[_member];
+    }
+    
    
-
-    
- 
-    
-    
     
 }

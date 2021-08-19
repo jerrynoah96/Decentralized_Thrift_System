@@ -49,8 +49,6 @@ contract SwapContract{
     }
     
  function swapEthForToken(uint256 ethAmount, address tokenAddress) public payable {
-     require(ethAmount == msg.value, 'kindly pass in right amount of eth');
-
     require(ethAmount <= msg.sender.balance, "Insufficient Eth Balance");
     
     address[] memory path = new address[](2);
