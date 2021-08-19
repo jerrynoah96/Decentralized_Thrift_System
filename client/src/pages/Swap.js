@@ -3,44 +3,25 @@ import "../styles/swap.css"
 import {CgArrowsExchangeV} from "react-icons/cg"
 import { useWeb3React } from '@web3-react/core'
 import {ethers} from "ethers";
-import abi from "../ABI/abi.json";
+import swapAbi from "../ABI/swapAbi.json"
 
 
 
-const Swap = ({HandleDisplayWalletModal}) => {
+const Swap = ({handleDisplayWalletModal}) => {
 
     const { library, account } = useWeb3React();
 
-    const address = "0x5826F074F9b3CD2156195c7A69ff03b3BE3043ed";
-    // contract interaction example
-    useEffect(() => {
-
-        // experimenting contract interaction
-        if (!!library && typeof address !== 'undefined') {
-            const contract = new ethers.Contract(address, abi, library);
-        
-            (async () => {
-                const name = await contract.name();
-                console.log(name)
-
-            })();
-        }
-    },[account, address, library])
-
-
-
- 
+    const swapAddress = "0xAf4a384DAD01f3B8f90c64a894A118d45Fe2bAB0";
 
 
     const [swapData, setSwapData] = useState({
         fromCurrency: "ETH",
         fromAmount: "",
-        toCurrency: "DAI",
+        toTokenContractAddress: "",
         toAmount: ""
     })
 
-    // const fromCurrencyList = ['ETH', 'BTC', 'LINK', 'MATIC', 'USDT']
-    const toCurrencyList = ['DAI']
+    const fromCurrencyList = ["ETH"]
 
     const isNumberKey = (e) => {
 
@@ -52,15 +33,15 @@ const Swap = ({HandleDisplayWalletModal}) => {
             case "fromAmount" :
                 if(charCode >= 48 && charCode <= 57) {
     
-                    // if the user tries to enter leading zeros continuosly
-                    if(charCode === 48 && swapData.fromAmount === "0") {
+                    
+                    if(charCode === 48 && swapData.fromAmount === "0") { // if the user tries to enter leading zeros continuosly
                         e.preventDefault()
                         return false;
                     }
                 
                     return true;
-                } else if(charCode === 46 && swapData.fromAmount.length && swapData.fromAmount.indexOf(".") === -1) {
-                    //allow the "." character only if it's not there before
+                } else if(charCode === 46 && !!swapData.fromAmount.length && swapData.fromAmount.indexOf(".") === -1) { //allow the "." character only if it's not there before
+                    
                     return true;
             
                 }
@@ -72,15 +53,15 @@ const Swap = ({HandleDisplayWalletModal}) => {
             case "toAmount" :
                 if(charCode >= 48 && charCode <= 57) {
     
-                    // if the user tries to enter leading zeros continuosly
-                    if(charCode === 48 && swapData.toAmount === "0") {
+                    
+                    if(charCode === 48 && swapData.toAmount === "0") { // if the user tries to enter leading zeros continuosly
                         e.preventDefault()
                         return false;
                     }
                 
                     return true;
-                } else if(charCode === 46 && swapData.toAmount.length && swapData.toAmount.indexOf(".") === -1) {
-                    //allow the "." character only if it's not there before
+                } else if(charCode === 46 && !!swapData.toAmount.length && swapData.toAmount.indexOf(".") === -1) { //allow the "." character only if it's not there before
+                    
                     return true;
             
                 }
@@ -99,23 +80,54 @@ const Swap = ({HandleDisplayWalletModal}) => {
         
     }
 
-    const onChangeAmount = (evt) => {
+    const isAllowableEtheruemCharacter = (e) => {
+
+        const charCode = (e.which) ? e.which : e.keyCode;
+
+        if(swapData.toTokenContractAddress === "" && charCode === 48)
+            return true;
+        else if(swapData.toTokenContractAddress === "0" && (charCode === 88 || charCode === 120 ))
+            return true
+        else if(swapData.toTokenContractAddress.length >= 2 && /[a-fA-F0-9]/.test(String.fromCharCode(charCode))) {
+            return true;
+        }
+        
+        e.preventDefault();
+        return false;
+    }
+
+    const onChangeToTokenContractAddress = (e) => {
+        setSwapData({...swapData, toTokenContractAddress: e.target.value})
+    }
+
+    const onPasteToTokenContractAddress = (e) => {
+        const pastedText = e.clipboardData.getData('Text')
+        if(/^0x[a-fA-F0-9]{40}$/.test(pastedText))
+            return setSwapData({...swapData, toTokenContractAddress: pastedText})
+           
+        e.preventDefault();
+    }
+
+    const onChangeAmount = (e) => {
 
         
-        let {value, name} = evt.target;
-        switch(name) {
+        let {value, name} = e.target;
+        switch(name) { // when one is changed. the other wil def. change. we need to get a convertion api to handle that
             case "fromAmount":
-                if(swapData.fromAmount === "0" && value.charAt(value.length-1) !== ".")
+                if(swapData.fromAmount === "0" && value.charAt(value.length-1) !== ".") {
+                    // if user tries to enter a number after 0 (0 is the only number in the input), replace the 0 with the number
                     setSwapData({...swapData, fromAmount: value.charAt(value.length-1)})
-                 else
+                } else {
                     setSwapData({...swapData, fromAmount: value})
-                
+                }                
                 break;
             case "toAmount":
-                if(swapData.toAmount === "0" && value.charAt(value.length-1) !== ".")
+                if(swapData.toAmount === "0" && value.charAt(value.length-1) !== ".") {
+                    // if user tries to enter a number after 0 (0 is the only number in the input), replace the 0 with the number
                     setSwapData({...swapData, toAmount: value.charAt(value.length-1)})
-                 else
+                } else {
                     setSwapData({...swapData, toAmount: value})
+                }
                 break;
             default:
                 break;
@@ -127,10 +139,12 @@ const Swap = ({HandleDisplayWalletModal}) => {
 
     const onChangeCurrency = (e) => {
         switch(e.target.name) {
+            
             case "fromCurrency":
                 setSwapData({...swapData, fromCurrency: e.target.value})
                 break;
 
+                // toCurrency is no longer a select element, it is now an input element that accepts a wallet address, nevertheless, i'll leave it here just in case
             case "toCurrency":
                 setSwapData({...swapData, toCurrency: e.target.value})
                 break;
@@ -139,30 +153,46 @@ const Swap = ({HandleDisplayWalletModal}) => {
         }
     }
 
+    const handleSwap = async (e) => {
+        e.preventDefault()
+
+        if(!swapData.fromCurrency || !swapData.fromAmount || !swapData.toTokenContractAddress, !swapData.toAmount) return;
+
+        if (!library && typeof swapAddress === 'undefined') return;
+            const swapContractInstance = new ethers.Contract(swapAddress, swapAbi, library.getSigner());
+
+            const amountWEI = ethers.utils.parseEther(swapData.fromAmount)
+
+        try {
+            await swapContractInstance.swapEthForToken(amountWEI, swapData.toTokenContractAddress)
+        } catch(err) {
+            console.log(err)
+        }
+        
+    }
+
     return(
         <div className = "swap-page container">
             <div className = "row">
-
-                <div className = "col-12 col-sm-8 offset-sm-2 col-lg-6 offset-lg-3 p-4 dex-wrapper">
+                <form onSubmit = {!account ? handleDisplayWalletModal : handleSwap} className = "col-12 col-sm-8 offset-sm-2 col-lg-6 offset-lg-3 p-4 dex-wrapper">
                     <h1>Swap</h1>
                     <div className = "from-section">
-                        <input className="from-token-address-input" autoComplete="off" autoCorrect="off" type="text" placeholder="Paste token address" name = "fromTokenContractAddress" />
-                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount} value = {swapData.fromAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "fromAmount" />
+                    <select className = "from-token-button" name = "fromCurrency" value = {swapData.fromCurrency} onChange = {onChangeCurrency}>
+                        {fromCurrencyList.map(currency=> {
+                                return <option value = {currency} key = {currency}>{currency}</option>
+                            })}
+                        </select>
+                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount}  value = {swapData.fromAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "fromAmount" />
                     </div>
                     <div className = "exchange-arrow-container">
                         <CgArrowsExchangeV className = "exchange-arrow-icon" />
                     </div>
                     <div className = "to-section">
-                        <select className = "from-token-button" name = "fromCurrency" value = {swapData.toCurrency} onChange = {onChangeCurrency}>
-                        {toCurrencyList.map(currency=> {
-                                return <option value = {currency} key = {currency}>{currency}</option>
-                            })}
-                        </select>
-                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount}  value = {swapData.toAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "toAmount" />
+                        <input className="to-token-address-input" autoComplete="off" autoCorrect="off" onKeyPress = {e => isAllowableEtheruemCharacter(e)} onChange = {onChangeToTokenContractAddress} onPaste = {(e) => onPasteToTokenContractAddress(e)} value = {swapData.toTokenContractAddress} type="text" placeholder="Paste token address" name = "fromTokenContractAddress" />
+                        <input className="token-amount-input" inputMode="decimal" autoComplete="off" onKeyPress = {e => isNumberKey(e)} onChange = {onChangeAmount} value = {swapData.toAmount} autoCorrect="off" type="text" pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" minLength="1" maxLength="79" spellCheck="false" name = "toAmount" />
                     </div>
-                    <button onClick = {!account ? HandleDisplayWalletModal : null} className = "swap-btn">{account ? "Swap" : "Connect Wallet"}</button>
-                </div>
-                
+                    <button type = "submit" className = "swap-btn">{account ? "Swap" : "Connect Wallet"}</button>
+                </form>              
             </div>
 
         </div>

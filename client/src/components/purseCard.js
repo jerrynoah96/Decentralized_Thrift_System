@@ -4,7 +4,7 @@ const PurseCard = ({id, dayCreated, currrentNoOfMembers, amount, open, onDisplay
     return(
         <div className = "purseCard" id = {id} onClick = {onDisplayPurseDetailsModal}>
             <div className = "purse-card-header">
-                <h1 className = "purse-id">{id}</h1>
+                <h1 className = "purse-id">{`${id.substr(0,6)}...${id.substr(id.length-4, id.length)}`}</h1>
                 {open ? <TiLockOpenOutline className = "status-icon open"/> : <TiLockClosedOutline className = "status-icon closed"/> }
             </div>
             <div className = "purse-card-body">
@@ -26,13 +26,3 @@ const PurseCard = ({id, dayCreated, currrentNoOfMembers, amount, open, onDisplay
 }
 
 export default PurseCard;
-
-
-// time created
-//     current_number of member
-//     join button
-//     go to dashbord(only for members)
-//     min-deposit amount
-//     max-member
-//     collaterall amount
-//     purse status

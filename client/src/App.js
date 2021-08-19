@@ -19,16 +19,16 @@ function App() {
   return (
     <div className="App">
       <Web3ReactProvider getLibrary={getLibrary}>
-      <Router>
-        <Switch>
-          <Route exact path="/">
-            <HomeView />
-          </Route>
-          <Route path="/app/">
-            <AppView />
-          </Route>
-        </Switch>
-      </Router>
+        <Router>
+          <Switch>
+            <Route exact path="/">
+              <HomeView />
+            </Route>
+            <Route path="/app/">
+              <AppView />
+            </Route>
+          </Switch>
+        </Router>
       </Web3ReactProvider>
     </div>
   );

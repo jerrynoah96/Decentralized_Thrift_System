@@ -9,7 +9,7 @@ import Backdrop from "../components/Backdrop"
 const WalletsModal = ({dismissModal}) => {
 
     const context = useWeb3React();
-    const { connector, activate} = context
+    const {connector, activate} = context
 
      // handle logic to recognize the connector currently being activated
   const [activatingConnector, setActivatingConnector] = useState()

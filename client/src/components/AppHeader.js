@@ -5,7 +5,7 @@ import UserAccount from "./userAccount"
 import {useWeb3React} from '@web3-react/core'
 import {utils} from "ethers"
 import logoWallet from "../assets/logo.png"
-const AppHeader = ({HandleDisplayWalletModal}) => {
+const AppHeader = ({handleDisplayWalletModal}) => {
     const {active,account,library, chainId} = useWeb3React()
 
     const [balance, setBalance] = useState()
@@ -51,7 +51,7 @@ const AppHeader = ({HandleDisplayWalletModal}) => {
                 </ul>
             </nav>
             <div className = "user-section">
-                {active ? <UserAccount balance = {balance} address = {account} /> : <button onClick = {HandleDisplayWalletModal}>Connect wallet</button>}
+                {balance ? <UserAccount balance = {parseFloat(balance).toFixed(2)} address = {account} /> : <button onClick = {handleDisplayWalletModal}>Connect wallet</button>}
                 
             </div>
         </header>

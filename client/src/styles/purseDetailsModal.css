@@ -12,6 +12,7 @@
 
 .purseModalDetails-close-icon {
   font-size: 1.8rem;
+  cursor: pointer;
 }
 
 .purseModalDetails-body {
@@ -82,4 +83,9 @@
 .joinPurseButton:hover {
   background: transparent;
   color: var(--ebony-clay);
+}
+
+.closed-purse-notice {
+  color: #f00;
+  font-weight: 500;
 }

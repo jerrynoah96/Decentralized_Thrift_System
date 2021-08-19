@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import {Switch, Route} from "react-router-dom"
+import {Switch, Route, useLocation} from "react-router-dom"
 import Particles from "react-tsparticles";
 import customParticle from "../utils/particles.json"
 import AppHeader from "../components/AppHeader";
 import Purses from "../pages/Purses"
 import Swap from "../pages/Swap"
+import PurseDasboard from "../pages/purseDashboard"
 import WalletsModal from "../components/walletsModal"
 import {useWeb3React} from '@web3-react/core'
 import { useEagerConnect, useInactiveListener } from '../hooks'
+import PurseContextProvider from "../context/purseContext"
 
 
 // function getErrorMessage(error) {
@@ -31,6 +33,9 @@ import { useEagerConnect, useInactiveListener } from '../hooks'
 
 const AppView = () => {
 
+    const {pathname} = useLocation()
+    const onDashboard = (pathname.startsWith("/app/purse/"))
+
   
     const particlesInit = (customParticle) => {
     // console.log(customParticle);
@@ -42,7 +47,7 @@ const AppView = () => {
 
     const context = useWeb3React();
 
-    const {connector} = context;
+    const {connector, active} = context;
 
     // handle logic to recognize the connector currently being activated
     const [activatingConnector, setActivatingConnector] = useState()
@@ -51,6 +56,10 @@ const AppView = () => {
           setActivatingConnector(undefined)
         }
     }, [activatingConnector, connector])
+
+    useEffect(() => {
+        setShowWalletModal(false);
+    }, [active])
 
 
     // handle logic to eagerly connect to the injected ethereum provider, if it exists and has granted access already
@@ -63,7 +72,8 @@ const AppView = () => {
 
     const [showWalletModal, setShowWalletModal] = useState(false)
 
-    const HandleDisplayWalletModal = () => {
+    const handleDisplayWalletModal = (e) => {
+        e.preventDefault();
       if(showWalletModal) {
         setShowWalletModal(false)
       } else {
@@ -111,17 +121,22 @@ const AppView = () => {
             />
 
               
-                <AppHeader HandleDisplayWalletModal = {HandleDisplayWalletModal} />
-                <Switch>
-                    <Route path = "/app/swap">
-                        <Swap HandleDisplayWalletModal = {HandleDisplayWalletModal} />
-                    </Route>
-                    <Route path = "/app/purses">
-                        <Purses />
-                    </Route>
-                </Switch>
+                {!onDashboard && <AppHeader handleDisplayWalletModal = {handleDisplayWalletModal} />}
+                <PurseContextProvider>
+                    <Switch>
+                        <Route exact path = "/app/swap">
+                            <Swap handleDisplayWalletModal = {handleDisplayWalletModal} />
+                        </Route>
+                        <Route exact path = "/app/purses">
+                            <Purses />
+                        </Route>
+                        <Route exact path = "/app/purse/:id">
+                            <PurseDasboard />
+                        </Route>
+                    </Switch>
+                </PurseContextProvider>
                 
-                {showWalletModal && <WalletsModal dismissModal = {HandleDisplayWalletModal} />}
+                {showWalletModal && <WalletsModal dismissModal = {handleDisplayWalletModal} />}
             
         </div>
     );
