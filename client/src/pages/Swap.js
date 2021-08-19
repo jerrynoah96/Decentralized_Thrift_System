@@ -1,9 +1,11 @@
-import {useState, useEffect} from "react"
+import { useState, useContext } from "react"
 import "../styles/swap.css"
 import {CgArrowsExchangeV} from "react-icons/cg"
 import { useWeb3React } from '@web3-react/core'
 import {ethers} from "ethers";
 import swapAbi from "../ABI/swapAbi.json"
+import {LoaderContext} from "../context/loaderContext";
+import {NotificationManager} from 'react-notifications';
 
 
 
@@ -11,7 +13,10 @@ const Swap = ({handleDisplayWalletModal}) => {
 
     const { library, account } = useWeb3React();
 
-    const swapAddress = "0xAf4a384DAD01f3B8f90c64a894A118d45Fe2bAB0";
+    const swapAddress = "0x13E26759A4550E876DC6e9b13c5184d54Ca25Acb";
+
+
+    const {setLoaderState} = useContext(LoaderContext)
 
 
     const [swapData, setSwapData] = useState({
@@ -103,9 +108,10 @@ const Swap = ({handleDisplayWalletModal}) => {
     const onPasteToTokenContractAddress = (e) => {
         const pastedText = e.clipboardData.getData('Text')
         if(/^0x[a-fA-F0-9]{40}$/.test(pastedText))
-            return setSwapData({...swapData, toTokenContractAddress: pastedText})
+            return true
            
         e.preventDefault();
+        return false;
     }
 
     const onChangeAmount = (e) => {
@@ -156,17 +162,33 @@ const Swap = ({handleDisplayWalletModal}) => {
     const handleSwap = async (e) => {
         e.preventDefault()
 
-        if(!swapData.fromCurrency || !swapData.fromAmount || !swapData.toTokenContractAddress, !swapData.toAmount) return;
+        if(!swapData.fromCurrency || !swapData.fromAmount || !swapData.toTokenContractAddress) return;
 
         if (!library && typeof swapAddress === 'undefined') return;
             const swapContractInstance = new ethers.Contract(swapAddress, swapAbi, library.getSigner());
 
-            const amountWEI = ethers.utils.parseEther(swapData.fromAmount)
+            const amountWEI = ethers.utils.parseUnits(swapData.fromAmount , "ether" ).toString()
 
         try {
-            await swapContractInstance.swapEthForToken(amountWEI, swapData.toTokenContractAddress)
+            const swapTx = await swapContractInstance.swapEthForToken(amountWEI, swapData.toTokenContractAddress, {value: amountWEI, gasPrice: ethers.utils.parseUnits('100', 'gwei'), gasLimit: 1000000})
+        
+            const txHash = await library.getTransaction(swapTx.hash);
+
+            if(txHash) setLoaderState(true);
+
+            await swapTx.wait()
+
+            const txReceipt = await library.getTransactionReceipt(swapTx.hash);
+
+            setLoaderState(false);
+            if (txReceipt && txReceipt.blockNumber) {
+                NotificationManager.success('Token swap success', 'Success!', 3000, () => {}, true);
+            } else {
+                NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
+            }
         } catch(err) {
-            console.log(err)
+            setLoaderState(false);
+            NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
         }
         
     }

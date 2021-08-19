@@ -1,0 +1,30 @@
+.disburse-fund-form {
+  background-color: var(--french-gray);
+  padding: 1.5rem;
+  border-radius: 0.2rem;
+  box-shadow: 0 0.2rem 1rem #000;
+}
+
+.disburse-fund-form h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--ebony-clay);
+}
+
+.disburse-fund-form .member-wallet-input {
+  padding: 0.4rem;
+  background: transparent;
+  border: 1px solid var(--ebony-clay);
+  border-radius: 0.2rem;
+  min-width: 20rem;
+}
+
+.submit-disburse-fund-form {
+  margin-left: 2rem;
+  padding: 0.4rem 1rem;
+  border-radius: 0.2rem;
+  background: var(--ebony-clay);
+  color: var(--french-gray);
+  font-weight: 700;
+}

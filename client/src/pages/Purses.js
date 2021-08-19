@@ -16,6 +16,8 @@ import purseAbi from "../ABI/purseAbi.json"
 import tokenAbi from "../ABI/tokenAbi.json"
 import {PurseContext} from "../context/purseContext";
 import PurseCardSkeleton from "../components/purseCardSkeleton";
+import {LoaderContext} from "../context/loaderContext";
+import {NotificationManager} from 'react-notifications';
 
 
 const Purses = () => {
@@ -23,12 +25,14 @@ const Purses = () => {
 
     const { library, account } = useWeb3React();
 
+    const {setLoaderState} = useContext(LoaderContext)
+
     const history = useHistory();
 
     const {purseArray, setPurseArray} = useContext(PurseContext)
     const [displayPurseSkeletons, setDisplayPurseSkeletons] = useState(true)
 
-    const purseFactoryAddress = "0x7239Ed91837Fd756B6C228B3e8A7a9d4A411eb4f";
+    const purseFactoryAddress = "0x5Ab8C225982282A352c842E20D5443dc8983E58D";
     const tokenAddress = "0xf0169620C98c21341aBaAeaFB16c69629Dafc06b"
 
     const [activeTab, setActiveTab] = useState("myPurses")
@@ -155,46 +159,53 @@ const Purses = () => {
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library);
 
             (async () => {
-                const allPurseAddress = await purseFactoryContractInstance.allPurse();
-               
-                const purses = []
 
-               if(!allPurseAddress.length) return setDisplayPurseSkeletons(false);
+                try {
 
-                allPurseAddress.forEach(purseAddress => {
-                    const purseContractInstance = new ethers.Contract(purseAddress, purseAbi, library);
+                    const allPurseAddress = await purseFactoryContractInstance.allPurse();
+                    
+                    const purses = []
 
-                    Promise.all([
-                        purseContractInstance.check_creation_date(),
-                        purseContractInstance.deposit_amount(),
-                        purseContractInstance.max_member_num(),
-                        purseContractInstance.required_collateral(),
-                        purseContractInstance.total_contribution(),
-                        purseContractInstance.view_Members(),
-                        purseContractInstance.bentoBox_balance(),
-                        purseContractInstance.check_time_interval()
-                    ]).then(data => {
-                        purses.push({
-                            id: purseAddress,
-                            dayCreated: convertCreatedDay(data[0]),
-                            members: data[5],
-                            maxMember: data[2].toString(),
-                            amount: ethers.utils.formatEther(data[1]),
-                            collateral: ethers.utils.formatEther(data[3]),
-                            totalContrbution: ethers.utils.formatEther(data[4]),
-                            open: data[5].length < data[2],
-                            frequency: data[7].toString(),
-                            bentoBoxBal: data[6].toString()
+                    if(!allPurseAddress.length) return setDisplayPurseSkeletons(false);
+
+                    allPurseAddress.forEach(purseAddress => {
+                        const purseContractInstance = new ethers.Contract(purseAddress, purseAbi, library);
+    
+                        Promise.all([
+                            purseContractInstance.check_creation_date(),
+                            purseContractInstance.deposit_amount(),
+                            purseContractInstance.max_member_num(),
+                            purseContractInstance.required_collateral(),
+                            purseContractInstance.total_contribution(),
+                            purseContractInstance.view_Members(),
+                            purseContractInstance.bentoBox_balance(),
+                            purseContractInstance.check_time_interval()
+                        ]).then(data => {
+                            purses.push({
+                                id: purseAddress,
+                                dayCreated: convertCreatedDay(data[0]),
+                                members: data[5],
+                                maxMember: data[2].toString(),
+                                amount: ethers.utils.formatEther(data[1]),
+                                collateral: ethers.utils.formatEther(data[3]),
+                                totalContrbution: ethers.utils.formatEther(data[4]),
+                                open: data[5].length < data[2],
+                                frequency: data[7].toString(),
+                                bentoBoxBal: data[6].toString()
+                            })
+
+                            if(purses.length === allPurseAddress.length)  {
+                                setPurseArray(purses);
+                                setDisplayPurseSkeletons(false);
+                            }
                         })
-
-                        if(purses.length === allPurseAddress.length)  {
-                            setPurseArray(purses);
-                            setDisplayPurseSkeletons(false);
-                        }
+    
+                        
                     })
 
-                    
-                })
+                } catch(err) {
+                    console.log(err)
+                }
             })();
         }
         // eslint-disable-next-line
@@ -209,7 +220,9 @@ const Purses = () => {
             const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, library.getSigner());
 
             const app = await tokenInstance.approve(address, amountWEI);
-
+            const txHash = await library.getTransaction(app.hash);
+            if(txHash) setLoaderState(true);
+            
             await app.wait();
         }
     }
@@ -222,6 +235,7 @@ const Purses = () => {
 
         if (!library && typeof purseFactoryAddress == 'undefined') return;
 
+
         const contributionAmountWEI = ethers.utils.parseEther(contributionAmount.toString(),)
 
         const collateralWEI = ethers.utils.parseEther(collateral.toString())
@@ -232,9 +246,28 @@ const Purses = () => {
             await approve(purseFactoryAddress, Number(contributionAmount) + Number(collateral))
 
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library.getSigner());
-            await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency);
+            const createPurseTx = await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency);
+            
+            const txHash = await library.getTransaction(createPurseTx.hash);
+            if(!txHash) return setLoaderState(false);
+
+            setPresentCreateNewPurseModal(false)
+
+            await createPurseTx.wait()
+            
+            const txReceipt = await library.getTransactionReceipt(createPurseTx.hash);
+
+            setLoaderState(false);
+
+            if (txReceipt && txReceipt.blockNumber) {
+                NotificationManager.success('Purse created successfully', 'Success!', 3000, () => {}, true);
+            } else {
+                NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
+            }
+            
         }catch(err) {
-            console.log(err)
+            setLoaderState(false);
+            NotificationManager.error('Something went wrong','Error!', 3000, () => {}, true)
         }
 
         
@@ -250,9 +283,29 @@ const Purses = () => {
             await approve(currentlyDisplayedPurseDetails.id, Number(currentlyDisplayedPurseDetails.amount) + Number(currentlyDisplayedPurseDetails.collateral))
           
             const purseContractInstance = new ethers.Contract(currentlyDisplayedPurseDetails.id, purseAbi, library.getSigner());
-            await purseContractInstance.joinPurse(contributionAmountWEI, collateralWEI)
+
+            const joinPurse = await purseContractInstance.joinPurse(contributionAmountWEI, collateralWEI)
+
+            const txHash = await library.getTransaction(joinPurse.hash);
+
+            if(!txHash) return setLoaderState(false);
+
+            setDisplayPurseDetailsModal(false)
+
+            await joinPurse.wait()
+
+            const txReceipt = await library.getTransactionReceipt(joinPurse.hash);
+
+            setLoaderState(false);
+
+            if (txReceipt && txReceipt.blockNumber) {
+                NotificationManager.success('Join a purse successfully', 'Success!', 3000, () => {}, true);
+            } else {
+                NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
+            }
         } catch(err) {
-            console.log(err)
+            setLoaderState(false);
+            NotificationManager.error('Something went wrong, could not join purse', 'Error!', 3000, () => {}, true)
         }
     
 

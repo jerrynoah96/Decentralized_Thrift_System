@@ -5,6 +5,7 @@ import HomeView from './views/HomeView';
 import AppView from './views/Appview';
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
 import { Web3ReactProvider} from '@web3-react/core'
+import LoaderContextProvider from "./context/loaderContext"
 import { Web3Provider } from '@ethersproject/providers'
 
 
@@ -19,16 +20,18 @@ function App() {
   return (
     <div className="App">
       <Web3ReactProvider getLibrary={getLibrary}>
-        <Router>
-          <Switch>
-            <Route exact path="/">
-              <HomeView />
-            </Route>
-            <Route path="/app/">
-              <AppView />
-            </Route>
-          </Switch>
-        </Router>
+        <LoaderContextProvider>
+          <Router>
+            <Switch>
+              <Route exact path="/">
+                <HomeView />
+              </Route>
+              <Route path="/app/">
+                <AppView />
+              </Route>
+            </Switch>
+          </Router>
+        </LoaderContextProvider>
       </Web3ReactProvider>
     </div>
   );

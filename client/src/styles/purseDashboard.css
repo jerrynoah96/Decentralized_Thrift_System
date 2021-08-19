@@ -28,8 +28,15 @@
   padding: 3rem;
 }
 
-.purseDashboard .purseDashboard-sidebar .nav-link-container .nav {
-  margin: 2rem 0;
+.purseDashboard
+  .purseDashboard-sidebar
+  .nav-link-container
+  .display-member-button {
+  padding: 0.5rem 1rem;
+  background: var(--ebony-clay);
+  border-radius: 0.2rem;
+  cursor: pointer;
+  margin: 1rem 0;
 }
 
 .purseDashboard .purseDashboard-sidebar .nav-link-container .nav button {
@@ -101,4 +108,5 @@
 
 .purseDashboard .right-container .main-content {
   height: 100%;
+  padding: 1rem;
 }

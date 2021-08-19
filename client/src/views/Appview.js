@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext} from "react";
 import {Switch, Route, useLocation} from "react-router-dom"
 import Particles from "react-tsparticles";
 import customParticle from "../utils/particles.json"
@@ -10,7 +10,10 @@ import WalletsModal from "../components/walletsModal"
 import {useWeb3React} from '@web3-react/core'
 import { useEagerConnect, useInactiveListener } from '../hooks'
 import PurseContextProvider from "../context/purseContext"
-
+import {LoaderContext} from "../context/loaderContext";
+import Loader from "../components/loader"
+import {NotificationContainer} from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 
 // function getErrorMessage(error) {
 //   if (error instanceof NoEthereumProviderError) {
@@ -36,6 +39,7 @@ const AppView = () => {
     const {pathname} = useLocation()
     const onDashboard = (pathname.startsWith("/app/purse/"))
 
+    const {loaderState} = useContext(LoaderContext)
   
     const particlesInit = (customParticle) => {
     // console.log(customParticle);
@@ -137,6 +141,9 @@ const AppView = () => {
                 </PurseContextProvider>
                 
                 {showWalletModal && <WalletsModal dismissModal = {handleDisplayWalletModal} />}
+                {loaderState && <Loader />}
+
+                <NotificationContainer />
             
         </div>
     );
