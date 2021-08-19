@@ -1,35 +1,10 @@
 
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.0;
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 
-interface IERC20 {
 
-  function totalSupply() external view returns (uint256);
-  
-  function decimals() external view returns (uint8);
-
-  function symbol() external view returns (string memory);
-
-  function name() external view returns (string memory);
-
-  function getOwner() external view returns (address);
-
-  function balanceOf(address account) external view returns (uint256);
-  function transfer(address recipient, uint256 amount) external returns (bool);
-
-  function allowance(address _owner, address spender) external view returns (uint256);
-
-  function approve(address spender, uint256 amount) external returns (bool);
-
-
-  function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-
- 
-  event Transfer(address indexed from, address indexed to, uint256 value);
-
-  event Approval(address indexed owner, address indexed spender, uint256 value);
-}
 
 interface IBentoxBox{
     function balanceOf(address,address) view external returns(uint256);
@@ -53,6 +28,8 @@ interface IBentoxBox{
 
 
 contract PurseContract{
+    
+    using SafeERC20 for IERC20;
     
     
     enum PurseState {Open, Closed, Terminate}
@@ -192,10 +169,10 @@ contract PurseContract{
     
     
     //this function is after the first round, at this point, user doesnt need to deposit collateral
-    function depositFunds(uint256 _amount) public {
-        require(isPurseMember[msg.sender] == true, 'only purse members please');
+  //  function depositFunds(uint256 _amount) public {
+  //      require(isPurseMember[msg.sender] == true, 'only purse members please');
         
-    }
+  //  }
     
     /* Members will have agreed on the order of recieving funds. the function will expect every member to vote for an address to recieve
     
