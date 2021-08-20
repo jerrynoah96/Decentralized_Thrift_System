@@ -1,10 +1,13 @@
 import "../styles/purseActions.css";
 
-const PurseActions = () => {
+const PurseActions = ({VotedMemberAddress, onChangeMemberWallettAddress, onPasteToTokenContractAddress, isAllowableEtheruemCharacter, onVoteToDisburseFund}) => {
     return(
         <div className = "purse-actions">
-            {/* <button className = "move-funds">Move funds to BentoBox</button>
-            <button className = "move-funds">Vote to Disburse</button> */}
+            <form className = "disburse-fund-form">
+                <h2 className = "vote-heading">Vote to disburse fund to a Member</h2>
+                <input className = "member-wallet-input" type = "text" placeholder = "member wallet address" value = {VotedMemberAddress} onChange = {onChangeMemberWallettAddress} onPaste = {e => onPasteToTokenContractAddress(e)} onKeyPress = {isAllowableEtheruemCharacter}/>
+                <button onClick = {onVoteToDisburseFund} className = "submit-disburse-fund-form">Vote</button>
+            </form>
         </div>
     );
 }
