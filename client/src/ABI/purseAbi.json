@@ -135,7 +135,13 @@
 	{
 		"inputs": [],
 		"name": "deposit_funds_to_bentoBox",
-		"outputs": [],
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},

@@ -75,7 +75,8 @@ contract PurseContract{
     address admin = 0x9dc821bc9B379a002E5bD4A1Edf200c19Bc5F9CA;
     
     //instantiate IBentoxBox
-    IBentoxBox bentoBoxInstance = IBentoxBox(0xF5BCE5077908a1b7370B9ae04AdC565EBd643966);
+    address bentoBox_address = 0xF5BCE5077908a1b7370B9ae04AdC565EBd643966;
+    IBentoxBox bentoBoxInstance = IBentoxBox(bentoBox_address);
     
     //events
     event PurseCreated(address _creator, uint256 starting_amount, uint256 max_members, uint256 _time_created);
@@ -185,7 +186,8 @@ contract PurseContract{
             require(has_voted_for_member_to_recieve_Funds[msg.sender][_memberAddress] == false, 'You can not vote twice in this round for this address to recieve');
             
             //increment vote for member to recieve funds
-            votes_for_member_to_recieve_funds[_memberAddress]++;
+           votes_for_member_to_recieve_funds[_memberAddress] = votes_for_member_to_recieve_funds[_memberAddress]++;
+            
             
             if(votes_for_member_to_recieve_funds[_memberAddress] == purse.members.length){
                 //this if statemement checks that every member has voted for a member. the member himself too would have voted
@@ -194,18 +196,22 @@ contract PurseContract{
                 
                 tokenInstance.transfer(_memberAddress, contract_total_deposit_balance[address(this)]);
                 num_of_members_who_has_recieved_funds++;
+                member_has_recieved[_memberAddress] = true;
+                contract_total_deposit_balance[address(this)] = 0;
                 
             }
 
-        return votes_for_member_to_recieve_funds[_memberAddress]++;
+        return votes_for_member_to_recieve_funds[_memberAddress];
             //after disbursing funds, reset some mappings to enable members to deposit again for another round
            
     }
 
 //any member can call this function
-    function deposit_funds_to_bentoBox()public {
+    function deposit_funds_to_bentoBox()public returns(uint256) {
         require(isPurseMember[msg.sender] == true, 'only purse members please');
         require(purse.members.length == max_member_num, 'members to be in purse are yet to be completed, so collaterals are not complete');
+        uint256 MAX_UINT256 = contract_total_collateral_balance[address(this)];
+        tokenInstance.approve(bentoBox_address, MAX_UINT256);
         bentoBoxInstance.deposit(tokenInstance,
         address(this), 
         address(this), 
@@ -213,6 +219,7 @@ contract PurseContract{
         0);
         
         contract_total_collateral_balance[address(this)] = 0;
+        
     }
     
     function bentoBox_balance()public view returns(uint256) {
@@ -222,6 +229,7 @@ contract PurseContract{
 
 //any member can call this function
     function withdraw_funds_from_bentoBox()public{
+        require(isPurseMember[msg.sender] == true, 'only purse members please');
     //    require(block.timestamp >= (purse.time_interval * max_member_num), 'Not yet time for withdrawal');
     require(num_of_members_who_has_recieved_funds == purse.members.length, 'Not yet time, not all members have recieved a round of contribution');
   //      require(
