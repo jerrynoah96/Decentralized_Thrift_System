@@ -46,7 +46,7 @@ contract PurseContract{
         
     }
     
-    
+
     address[] purseMembers;
     mapping(address=>uint256) memberToCollateral; //map a user tp ccollateral deposited
     mapping(address=>uint256) memberToDeposit; //map a user to amount deposited- ofcourse all members will deposit same amount
@@ -79,8 +79,9 @@ contract PurseContract{
     IBentoxBox bentoBoxInstance = IBentoxBox(bentoBox_address);
     
     //events
-    event PurseCreated(address _creator, uint256 starting_amount, uint256 max_members, uint256 _time_created);
-    event MemberVotedFor(address _member, uint256 _currentVotesFor);
+    event PurseCreated(address indexed _creator, uint256 starting_amount, uint256 max_members, uint256 indexed _time_created);
+    event MemberVotedFor(address indexed _member, uint256 indexed _currentVotesFor);
+    event Deposited(address indexed _member, uint256 indexed _time_created);
     
     
     constructor(address _creator, uint256 _amount, uint256 _collateral, uint256 _max_member, uint256 time_interval) payable {
@@ -89,6 +90,7 @@ contract PurseContract{
        uint256 _required_collateral = _amount * _max_member;
        required_collateral = _required_collateral;
         require(_collateral == _required_collateral, 'collateral should be deposit amount multiplied by max number of expected member');
+        tokenInstance.transferFrom(msg.sender, address(this), (_collateral + _amount));
         memberToDeposit[_creator] = _amount; //
         memberToCollateral[_creator] = _collateral;
         purseMembers.push(_creator); //push member to array of members
@@ -171,10 +173,14 @@ contract PurseContract{
     
     
     //this function is after the first round, at this point, user doesnt need to deposit collateral
-  //  function depositFunds(uint256 _amount) public {
-  //      require(isPurseMember[msg.sender] == true, 'only purse members please');
+    function depositFunds() public {
+        require(isPurseMember[msg.sender] == true, 'only purse members please');
+        tokenInstance.transferFrom(msg.sender, address(this), deposit_amount);
+        memberToDeposit[msg.sender] += deposit_amount;
+        contract_total_deposit_balance[address(this)]+= deposit_amount;
+        emit Deposited(msg.sender, block.timestamp);
         
-  //  }
+    }
     
     /* Members will have agreed on the order of recieving funds. the function will expect every member to vote for an address to recieve
     
@@ -291,6 +297,10 @@ contract PurseContract{
         return member_has_recieved[_member];
     }
     
-   
+    //this returns all deposit by a member and can help to check at every given point which member hasnt deposited
+   function viewMemberTotalDeposit(address _member)public view returns(uint256){
+       require(isPurseMember[_member] == true, 'only purse members please');
+       return memberToDeposit[_member];
+   }
     
 }
