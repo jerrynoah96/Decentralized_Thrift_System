@@ -63,7 +63,7 @@ contract PurseContract{
     
     
     
-    address _address_of_token = 0xf0169620C98c21341aBaAeaFB16c69629Dafc06b; //address of acceptable erc20 token - basically a stable coin
+    address _address_of_token = 0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735; //address of acceptable erc20 token - basically a stable coin DAI-rinkeby
     IERC20 tokenInstance = IERC20(_address_of_token);
     Purse purse; //instantiate struct purse
     uint256 public deposit_amount; //the deployer of each purse will set this amount which every other person to join will deposit
