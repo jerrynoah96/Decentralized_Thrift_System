@@ -18,12 +18,13 @@ import {PurseContext} from "../context/purseContext";
 import PurseCardSkeleton from "../components/purseCardSkeleton";
 import {LoaderContext} from "../context/loaderContext";
 import {NotificationManager} from 'react-notifications';
+import {network} from '../connectors'
 
 
 const Purses = () => {
 
 
-    const { library, account } = useWeb3React();
+    const { library, account, activate } = useWeb3React();
 
     const {setLoaderState} = useContext(LoaderContext)
 
@@ -141,10 +142,10 @@ const Purses = () => {
         e.preventDefault()
 
         if(!Number(newPurseData.amount)) {
-            return alert("amount must be greater than 0")
+            return NotificationManager.error('amount must be greater than 0', 'Error!', 4000, () => {}, true)
         }
         if(Number(newPurseData.numberOfMembers) < 2) {
-            return alert("number of members must be equal to or greater than 2")
+            return NotificationManager.error('number of members must be equal to or greater than 2', 'Error!', 4000, () => {}, true)
         }
        
         await createPurse(newPurseData.amount, newPurseData.collateral, newPurseData.numberOfMembers, newPurseData.frequency);
@@ -207,6 +208,12 @@ const Purses = () => {
                     console.log(err)
                 }
             })();
+        } else {
+            (async () => {
+                // this will fire this useEffect again because library will be changed
+                await activate(network);
+            })();
+            
         }
         // eslint-disable-next-line
     }, [library])

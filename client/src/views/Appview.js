@@ -7,29 +7,44 @@ import Purses from "../pages/Purses"
 import Swap from "../pages/Swap"
 import PurseDasboard from "../pages/purseDashboard"
 import WalletsModal from "../components/walletsModal"
-import {useWeb3React} from '@web3-react/core'
+import {useWeb3React, UnsupportedChainIdError} from '@web3-react/core'
 import { useEagerConnect, useInactiveListener } from '../hooks'
 import PurseContextProvider from "../context/purseContext"
 import {LoaderContext} from "../context/loaderContext";
 import Loader from "../components/loader"
-import {NotificationContainer} from 'react-notifications';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
+import {UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from '@web3-react/walletconnect-connector'
+import {NoEthereumProviderError, UserRejectedRequestError as UserRejectedRequestErrorInjected} from '@web3-react/injected-connector'
 
-// function getErrorMessage(error) {
-//   if (error instanceof NoEthereumProviderError) {
-//     return 'No Ethereum browser extension detected, install MetaMask on desktop or visit from a dApp browser on mobile.'
-//   } else if (error instanceof UnsupportedChainIdError) {
-//     return "You're connected to an unsupported network."
-//   } else if (
-//     error instanceof UserRejectedRequestErrorInjected ||
-//     error instanceof UserRejectedRequestErrorWalletConnect
-//   ) {
-//     return 'Please authorize this website to access your Ethereum account.'
-//   } else {
-//     console.error(error)
-//     return 'An unknown error occurred. Check the console for more details.'
-//   }
-// }
+
+function getErrorMessage(error) {
+  if (error instanceof NoEthereumProviderError) {
+    return {
+        title: 'No Ethereum browser extension detected!',
+        message: 'Install MetaMask on desktop or visit from a dApp browser on mobile.'
+    }
+  } else if (error instanceof UnsupportedChainIdError) {
+    return {
+        title: 'Please switch to Rinkeby network!',
+        message: "You're connected to an unsupported network"
+    }
+  } else if (
+    error instanceof UserRejectedRequestErrorInjected ||
+    error instanceof UserRejectedRequestErrorWalletConnect
+  ) {
+    return {
+        title: 'Connection denined!',
+        message: "Please authorize this website to access your Ethereum account."
+    }
+  } else {
+    console.error(error)
+    return {
+        title: 'Error!',
+        message: "An unknown error occurred. Check the console for more details."
+    }
+  }
+}
 
 
 
@@ -49,9 +64,7 @@ const AppView = () => {
     // console.log(container);
     }
 
-    const context = useWeb3React();
-
-    const {connector, active} = context;
+    const {connector, active, error} = useWeb3React();
 
     // handle logic to recognize the connector currently being activated
     const [activatingConnector, setActivatingConnector] = useState()
@@ -64,6 +77,13 @@ const AppView = () => {
     useEffect(() => {
         setShowWalletModal(false);
     }, [active])
+
+    useEffect(() => {
+        if(!!error) {
+           const errorText = getErrorMessage(error);
+            NotificationManager.error(errorText.message, errorText.title, 10000, () => {}, true)
+        }
+    }, [error])
 
 
     // handle logic to eagerly connect to the injected ethereum provider, if it exists and has granted access already
