@@ -4,7 +4,7 @@ const HomeView = () => {
     return(
         <div className = "home-view">
             <Switch>
-                <Route path = "/">
+                <Route exact path = "/">
                     <Home />
                 </Route>
             </Switch>
