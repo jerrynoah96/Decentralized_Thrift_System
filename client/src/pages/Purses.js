@@ -33,8 +33,8 @@ const Purses = () => {
     const {purseArray, setPurseArray} = useContext(PurseContext)
     const [displayPurseSkeletons, setDisplayPurseSkeletons] = useState(true)
 
-    const purseFactoryAddress = "0x5Ab8C225982282A352c842E20D5443dc8983E58D";
-    const tokenAddress = "0xf0169620C98c21341aBaAeaFB16c69629Dafc06b"
+    const purseFactoryAddress = "0x3FBB5cDc8426EE92fd45c24188B57f2a0225f37B";
+    const tokenAddress = "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735";
 
     const [activeTab, setActiveTab] = useState("myPurses")
 

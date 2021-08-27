@@ -46,7 +46,7 @@ contract PurseContract{
         
     }
     
-    
+
     address[] purseMembers;
     mapping(address=>uint256) memberToCollateral; //map a user tp ccollateral deposited
     mapping(address=>uint256) memberToDeposit; //map a user to amount deposited- ofcourse all members will deposit same amount
@@ -63,7 +63,7 @@ contract PurseContract{
     
     
     
-    address _address_of_token = 0xf0169620C98c21341aBaAeaFB16c69629Dafc06b; //address of acceptable erc20 token - basically a stable coin
+    address _address_of_token = 0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735; //address of acceptable erc20 token - basically a stable coin DAI-rinkeby
     IERC20 tokenInstance = IERC20(_address_of_token);
     Purse purse; //instantiate struct purse
     uint256 public deposit_amount; //the deployer of each purse will set this amount which every other person to join will deposit
@@ -75,11 +75,13 @@ contract PurseContract{
     address admin = 0x9dc821bc9B379a002E5bD4A1Edf200c19Bc5F9CA;
     
     //instantiate IBentoxBox
-    IBentoxBox bentoBoxInstance = IBentoxBox(0xF5BCE5077908a1b7370B9ae04AdC565EBd643966);
+    address bentoBox_address = 0xF5BCE5077908a1b7370B9ae04AdC565EBd643966;
+    IBentoxBox bentoBoxInstance = IBentoxBox(bentoBox_address);
     
     //events
-    event PurseCreated(address _creator, uint256 starting_amount, uint256 max_members, uint256 _time_created);
-    event MemberVotedFor(address _member, uint256 _currentVotesFor);
+    event PurseCreated(address indexed _creator, uint256 starting_amount, uint256 max_members, uint256 indexed _time_created);
+    event MemberVotedFor(address indexed _member, uint256 indexed _currentVotesFor);
+    event Deposited(address indexed _member, uint256 indexed _time_created);
     
     
     constructor(address _creator, uint256 _amount, uint256 _collateral, uint256 _max_member, uint256 time_interval) payable {
@@ -88,6 +90,7 @@ contract PurseContract{
        uint256 _required_collateral = _amount * _max_member;
        required_collateral = _required_collateral;
         require(_collateral == _required_collateral, 'collateral should be deposit amount multiplied by max number of expected member');
+        tokenInstance.transferFrom(msg.sender, address(this), (_collateral + _amount));
         memberToDeposit[_creator] = _amount; //
         memberToCollateral[_creator] = _collateral;
         purseMembers.push(_creator); //push member to array of members
@@ -170,10 +173,14 @@ contract PurseContract{
     
     
     //this function is after the first round, at this point, user doesnt need to deposit collateral
-  //  function depositFunds(uint256 _amount) public {
-  //      require(isPurseMember[msg.sender] == true, 'only purse members please');
+    function depositFunds() public {
+        require(isPurseMember[msg.sender] == true, 'only purse members please');
+        tokenInstance.transferFrom(msg.sender, address(this), deposit_amount);
+        memberToDeposit[msg.sender] += deposit_amount;
+        contract_total_deposit_balance[address(this)]+= deposit_amount;
+        emit Deposited(msg.sender, block.timestamp);
         
-  //  }
+    }
     
     /* Members will have agreed on the order of recieving funds. the function will expect every member to vote for an address to recieve
     
@@ -185,7 +192,8 @@ contract PurseContract{
             require(has_voted_for_member_to_recieve_Funds[msg.sender][_memberAddress] == false, 'You can not vote twice in this round for this address to recieve');
             
             //increment vote for member to recieve funds
-            votes_for_member_to_recieve_funds[_memberAddress]++;
+           votes_for_member_to_recieve_funds[_memberAddress] = votes_for_member_to_recieve_funds[_memberAddress]++;
+            
             
             if(votes_for_member_to_recieve_funds[_memberAddress] == purse.members.length){
                 //this if statemement checks that every member has voted for a member. the member himself too would have voted
@@ -194,18 +202,22 @@ contract PurseContract{
                 
                 tokenInstance.transfer(_memberAddress, contract_total_deposit_balance[address(this)]);
                 num_of_members_who_has_recieved_funds++;
+                member_has_recieved[_memberAddress] = true;
+                contract_total_deposit_balance[address(this)] = 0;
                 
             }
 
-        return votes_for_member_to_recieve_funds[_memberAddress]++;
+        return votes_for_member_to_recieve_funds[_memberAddress];
             //after disbursing funds, reset some mappings to enable members to deposit again for another round
            
     }
 
 //any member can call this function
-    function deposit_funds_to_bentoBox()public {
+    function deposit_funds_to_bentoBox()public returns(uint256) {
         require(isPurseMember[msg.sender] == true, 'only purse members please');
         require(purse.members.length == max_member_num, 'members to be in purse are yet to be completed, so collaterals are not complete');
+        uint256 MAX_UINT256 = contract_total_collateral_balance[address(this)];
+        tokenInstance.approve(bentoBox_address, MAX_UINT256);
         bentoBoxInstance.deposit(tokenInstance,
         address(this), 
         address(this), 
@@ -213,6 +225,7 @@ contract PurseContract{
         0);
         
         contract_total_collateral_balance[address(this)] = 0;
+        
     }
     
     function bentoBox_balance()public view returns(uint256) {
@@ -222,6 +235,7 @@ contract PurseContract{
 
 //any member can call this function
     function withdraw_funds_from_bentoBox()public{
+        require(isPurseMember[msg.sender] == true, 'only purse members please');
     //    require(block.timestamp >= (purse.time_interval * max_member_num), 'Not yet time for withdrawal');
     require(num_of_members_who_has_recieved_funds == purse.members.length, 'Not yet time, not all members have recieved a round of contribution');
   //      require(
@@ -283,6 +297,10 @@ contract PurseContract{
         return member_has_recieved[_member];
     }
     
-   
+    //this returns all deposit by a member and can help to check at every given point which member hasnt deposited
+   function viewMemberTotalDeposit(address _member)public view returns(uint256){
+       require(isPurseMember[_member] == true, 'only purse members please');
+       return memberToDeposit[_member];
+   }
     
 }
