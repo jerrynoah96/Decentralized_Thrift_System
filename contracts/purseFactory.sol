@@ -17,6 +17,8 @@ contract PurseFactory{
     address[] _list_of_purses;//this array contains addresss of each purse
     mapping(address=> uint256) id_to_purse;
     
+    
+    
     function createPurse(uint256 contribution_amount, uint256 _collateral, uint256 _max_member, uint256 time_interval)public {
         PurseContract purse = new PurseContract(msg.sender, contribution_amount, _collateral, _max_member, time_interval);
         //purse factory contract should be approved
@@ -33,6 +35,8 @@ contract PurseFactory{
     function allPurse()public view returns(address[]memory){
         return _list_of_purses;
     }
+    
+    
     
     
     
