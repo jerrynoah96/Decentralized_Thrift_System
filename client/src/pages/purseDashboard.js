@@ -13,6 +13,7 @@ import purseAbi from "../ABI/purseAbi.json"
 import { ethers } from "ethers";
 import {LoaderContext} from "../context/loaderContext";
 import {NotificationManager} from 'react-notifications';
+import tokenAbi from "../ABI/tokenAbi.json"
 
 
 const PurseDashboard = () => {
@@ -31,6 +32,8 @@ const PurseDashboard = () => {
     const overviewLink = useRef(null);
     const chatRoomLink = useRef(null)
     const actionsLink = useRef(null)
+
+    const tokenAddress = "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735";
 
     const onDisplayPurseMembersList = (e) => {
         
@@ -134,7 +137,7 @@ const PurseDashboard = () => {
     const onVoteToDisburseFund = async (e) => {
 
         e.preventDefault()
-        if(!dashboardData.members.includes(VotedMemberAddress)) return NotificationManager.error('Invalid member address', 'Error!', 3000, () => {}, true)
+        if(!dashboardData.members.includes(VotedMemberAddress)) return NotificationManager.error('You cannot vote for non-member', 'Invalid member address!', 3000, () => {}, true)
 
         if (!!library && typeof dashboardData.id !== 'undefined') {
 
@@ -166,6 +169,59 @@ const PurseDashboard = () => {
             }
            
         }
+    }
+
+
+    const approve = async (address, amount) => {
+        if (!!library && typeof tokenAddress !== 'undefined') {
+
+            const amountWEI = ethers.utils.parseEther(amount.toString())
+
+            const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, library.getSigner());
+
+            const app = await tokenInstance.approve(address, amountWEI);
+            const txHash = await library.getTransaction(app.hash);
+            if(txHash) setLoaderState(true);
+            
+            await app.wait();
+        }
+    }
+
+    const deposite = async (e) => {
+        e.preventDefault();
+
+        if (!!library && typeof dashboardData.id !== 'undefined') {
+            
+        try {
+            await approve(dashboardData.id, Number(dashboardData.amount))
+          
+            const purseContractInstance = new ethers.Contract(dashboardData.id, purseAbi, library.getSigner());
+
+
+            const depositeFunds = await purseContractInstance.depositFunds()
+
+            const txHash = await library.getTransaction(depositeFunds.hash);
+
+            if(!txHash) return setLoaderState(false);
+
+            await depositeFunds.wait()
+
+            const txReceipt = await library.getTransactionReceipt(depositeFunds.hash);
+
+            setLoaderState(false);
+
+            if (txReceipt && txReceipt.blockNumber) {
+                NotificationManager.success('Deposited succesfully', 'Success!', 3000, () => {}, true);
+            } else {
+                NotificationManager.error('Deposit not successfull', 'Something went wrong!', 3000, () => {}, true)
+            }
+        } catch(err) {
+            setLoaderState(false);
+            NotificationManager.error('Deposit not successfull', 'Something went wrong!', 3000, () => {}, true)
+        }
+           
+        }
+
     }
 
     useEffect(() => {
@@ -204,7 +260,7 @@ const PurseDashboard = () => {
                 <main className = "main-content">
                     {activeTab === "overview" && dashboardData.id && <DashboardOverview maxMember = {dashboardData.maxMember} availableMember = {dashboardData.members.length} dayCreated = {dashboardData.dayCreated} totalCollateral = {dashboardData.collateral} />}
                     {activeTab === "chat-room" && <PurseDiscussion />}
-                    {activeTab === "actions" && <PurseActions VotedMemberAddress = {VotedMemberAddress} onChangeMemberWallettAddress = {onChangeMemberWallettAddress} isAllowableEtheruemCharacter = {isAllowableEtheruemCharacter} onPasteToTokenContractAddress = {onPasteToTokenContractAddress} onVoteToDisburseFund = {onVoteToDisburseFund} />}
+                    {activeTab === "actions" && <PurseActions VotedMemberAddress = {VotedMemberAddress} onChangeMemberWallettAddress = {onChangeMemberWallettAddress} isAllowableEtheruemCharacter = {isAllowableEtheruemCharacter} onPasteToTokenContractAddress = {onPasteToTokenContractAddress} onVoteToDisburseFund = {onVoteToDisburseFund} deposite = {deposite} />}
                 </main>
             </div>
             {displayPurseMembersList && dashboardData.id && <PurseMembersListModal members = {dashboardData.members} dismissModal = {onDisplayPurseMembersList} />}

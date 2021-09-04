@@ -33,8 +33,9 @@ const Purses = () => {
     const {purseArray, setPurseArray} = useContext(PurseContext)
     const [displayPurseSkeletons, setDisplayPurseSkeletons] = useState(true)
 
-    const purseFactoryAddress = "0x3FBB5cDc8426EE92fd45c24188B57f2a0225f37B";
     const tokenAddress = "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735";
+    const purseFactoryAddress= "0xC22996446E9C27773eaAee8dCD6b5e9C26cF4CCA";
+
 
     const [activeTab, setActiveTab] = useState("myPurses")
 
@@ -151,6 +152,75 @@ const Purses = () => {
         await createPurse(newPurseData.amount, newPurseData.collateral, newPurseData.numberOfMembers, newPurseData.frequency);
     }
 
+    // const purseFactoryContract = {
+
+    //     contractAddress: "0x1b7eaC2fa692e9D2499a06cbbba0a076A206e44D",
+    //     purses: [],
+        
+       
+
+    //     async initContract() {
+    //         if (!!library)
+    //             this.contractInstance = new ethers.Contract(this.contractAddress, purseFactoryAbi, library)
+    //         else {
+    //             await activate(network)
+    //             this.contractInstance = new ethers.Contract(this.contractAddress, purseFactoryAbi, library)
+    //         }
+
+    //         return this.fetchAllPursesAddress()
+    //         console.log("one")
+    //     },
+
+    //     async fetchAllPursesAddress() {
+    //         this.allPurseAddress = await this.contractInstance.allPurse()
+    //         return purses.fetchAllPursesData(this.allPurseAddress)
+    //         console.log("two")
+    //     }
+
+    // }
+
+
+    // const purses = {
+
+
+    //     async fetchAllPursesData(allPurseAddress) {
+
+    //         allPurseAddress.forEach(async purseAddress => {
+    //             await this.fetchPurseData(purseAddress)   
+    //         })
+    //         console.log("three")
+    //     },
+
+    //     async fetchPurseData(purseAddress) {
+
+    //         const purseContractInstance = new ethers.Contract(purseAddress, purseAbi, library);
+
+    //         Promise.all([
+    //             purseContractInstance.check_creation_date(),
+    //             purseContractInstance.deposit_amount(),
+    //             purseContractInstance.max_member_num(),
+    //             purseContractInstance.required_collateral(),
+    //             purseContractInstance.total_contribution(),
+    //             purseContractInstance.view_Members(),
+    //             purseContractInstance.bentoBox_balance(),
+    //             purseContractInstance.check_time_interval()
+    //         ]).then(data => {
+    //             this.allPurseArray.push({
+    //                 id: purseAddress,
+    //                 dayCreated: convertCreatedDay(data[0]),
+    //                 members: data[5],
+    //                 maxMember: data[2].toString(),
+    //                 amount: ethers.utils.formatEther(data[1]),
+    //                 collateral: ethers.utils.formatEther(data[3]),
+    //                 totalContrbution: ethers.utils.formatEther(data[4]),
+    //                 open: data[5].length < data[2],
+    //                 frequency: data[7].toString(),
+    //                 bentoBoxBal: data[6].toString()
+    //             })
+    //         })
+    //     }
+
+    // }
     
 
     useEffect(() => {
@@ -158,6 +228,8 @@ const Purses = () => {
         // instantiating the purseFactory contract
         if (!!library && typeof purseFactoryAddress !== 'undefined') {
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library);
+
+            
 
             (async () => {
 
@@ -208,6 +280,11 @@ const Purses = () => {
                     console.log(err)
                 }
             })();
+
+            // listen for event here
+            purseFactoryContractInstance.on('PurseCreated', (creator, starting_amount, max_members, time_created) => {
+                console.log("purse created by: ", creator, starting_amount, max_members, time_created)
+            })
         } else {
             (async () => {
                 // this will fire this useEffect again because library will be changed
@@ -237,13 +314,13 @@ const Purses = () => {
 
     const createPurse = async (contributionAmount, collateral, maxMember, frequency) => {
 
-        if(!contributionAmount || !collateral || !maxMember || !frequency) return;
+        if(!contributionAmount || !collateral || !maxMember || !frequency) return NotificationManager.error('Please fill all the fields appropriately', 'warning!', 3000, () => {}, true);
 
 
         if (!library && typeof purseFactoryAddress == 'undefined') return;
 
 
-        const contributionAmountWEI = ethers.utils.parseEther(contributionAmount.toString(),)
+        const contributionAmountWEI = ethers.utils.parseEther(contributionAmount.toString())
 
         const collateralWEI = ethers.utils.parseEther(collateral.toString())
 
@@ -253,7 +330,7 @@ const Purses = () => {
             await approve(purseFactoryAddress, Number(contributionAmount) + Number(collateral))
 
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library.getSigner());
-            const createPurseTx = await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency);
+            const createPurseTx = await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency, { gasPrice: 1000000000, gasLimit: 100000,});
             
             const txHash = await library.getTransaction(createPurseTx.hash);
             if(!txHash) return setLoaderState(false);
@@ -273,6 +350,7 @@ const Purses = () => {
             }
             
         }catch(err) {
+            console.log("Here: ", err)
             setLoaderState(false);
             NotificationManager.error('Something went wrong','Error!', 3000, () => {}, true)
         }
