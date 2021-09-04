@@ -68,7 +68,7 @@ contract PurseContract{
     Purse purse; //instantiate struct purse
     uint256 public deposit_amount; //the deployer of each purse will set this amount which every other person to join will deposit
     uint256 public max_member_num;
-    uint256 public required_collateral = (deposit_amount * max_member_num);
+    uint256 public required_collateral;
     uint256 public purseId;
     uint256 public increment_in_membership;
     uint256 public num_of_members_who_has_recieved_funds;
@@ -84,13 +84,14 @@ contract PurseContract{
     event Deposited(address indexed _member, uint256 indexed _time_created);
     
     
+    //deposit of fund and collateral for creator happens in token factory- see createPurse function
     constructor(address _creator, uint256 _amount, uint256 _collateral, uint256 _max_member, uint256 time_interval) payable {
         deposit_amount=_amount;//set this amount to deposit_amount
         max_member_num=_max_member; //set max needed member
-       uint256 _required_collateral = _amount * _max_member;
+       uint256 _required_collateral = _amount * (_max_member-1);
        required_collateral = _required_collateral;
-        require(_collateral == _required_collateral, 'collateral should be deposit amount multiplied by max number of expected member');
-        tokenInstance.transferFrom(msg.sender, address(this), (_collateral + _amount));
+        require(_collateral == _required_collateral, 'collateral should be deposit amount multiplied by (max number of expected member - 1)');
+      //  require(tokenInstance.balanceOf(address(this)) == (_amount + required_collateral), 'deposit of funds and collateral not happening, ensure you are deploying fron PurseFactory Contract');
         memberToDeposit[_creator] = _amount; //
         memberToCollateral[_creator] = _collateral;
         purseMembers.push(_creator); //push member to array of members
@@ -112,7 +113,7 @@ contract PurseContract{
         require(purse.purseState == PurseState.Open, 'This purse is not longer accepting members');
         require(isPurseMember[msg.sender] == false, 'you are already a member in this purse');
         require(_amount == deposit_amount, 'You cannot deposit above or below the starting amount');
-        require(_collateral == required_collateral, 'collateral should be deposit amount multiplied by max expected member');
+        require(_collateral == required_collateral, 'collateral should be deposit amount multiplied by (max expected member - 1)');
         tokenInstance.transferFrom(msg.sender, address(this), (_collateral + _amount));
          memberToDeposit[msg.sender] = _amount;
         memberToCollateral[msg.sender] = _collateral;
