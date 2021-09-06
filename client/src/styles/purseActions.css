@@ -47,6 +47,11 @@
   transition: all ease-in-out 0.3s;
 }
 
-.deposite-section .deposite-btn:hover {
+.deposite-section .deposite-history-btn {
+  margin-left: 2rem;
+}
+
+.deposite-section .deposite-btn:hover,
+.deposite-section .deposite-history-btn:hover {
   padding: 0.9rem 2.2rem;
 }

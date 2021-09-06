@@ -126,7 +126,7 @@ const PurseDashboard = () => {
             return true;
            
         e.preventDefault();
-        return NotificationManager.error('Not a valid address', 'Error!', 3000, () => {}, true)
+        NotificationManager.error('Not a valid address', 'Error!', 3000, () => {}, true)
         return false;
     }
 
@@ -232,6 +232,7 @@ const PurseDashboard = () => {
         
         setDashboardData(purse);
 
+        // eslint-disable-next-line
     }, [])
 
    
@@ -252,7 +253,7 @@ const PurseDashboard = () => {
                     <h1 className = "dashboard-title">DASHBOARD</h1>
                     {dashboardData.id && <div className = "info">
                     <h3 className = "purse-id">PURSE ID: {`${dashboardData.id.substr(0,6)}...${dashboardData.id.substr(dashboardData.id.length-4, id.length)}`}</h3>
-                    <h3 className = "bentoBox-bal">Bal of BentoBox: {dashboardData.bentoBoxBal} TTK</h3>
+                    <h3 className = "bentoBox-bal">Bal of BentoBox: {dashboardData.bentoBoxBal} DAI</h3>
                     </div>
                     }
                     <button onClick = {MoveFundsToBentoBox} className = "to-bentoBox">Move funds to bentoBox <img className = "bento-logo" alt = "bentBox logo" src = "https://raw.githubusercontent.com/sushiswap/sushi-content/master/products/bento-color.png" /></button>
