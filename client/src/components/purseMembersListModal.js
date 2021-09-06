@@ -23,8 +23,8 @@ const PurseMembersListModal = ({members, dismissModal}) => {
       
         try {
           const successful = document.execCommand('copy');
-          const msg = successful ? 'successful' : 'unsuccessful';
-          NotificationManager.success('copied!', '', 3000, () => {}, true);
+          const msg = successful ? 'copied!' : 'not copied!';
+          NotificationManager.success(msg, '', 3000, () => {}, true);
         } catch (err) {
           NotificationManager.warning('copy failed!', '', 3000, () => {}, true);
         }

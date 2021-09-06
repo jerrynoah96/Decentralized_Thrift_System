@@ -33,8 +33,9 @@ const Purses = () => {
     const {purseArray, setPurseArray} = useContext(PurseContext)
     const [displayPurseSkeletons, setDisplayPurseSkeletons] = useState(true)
 
-    const purseFactoryAddress = "0x3FBB5cDc8426EE92fd45c24188B57f2a0225f37B";
     const tokenAddress = "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735";
+    const purseFactoryAddress= "0x681254591658f6Ed04FC50e8225eb3Be9d8b00fE";
+
 
     const [activeTab, setActiveTab] = useState("myPurses")
 
@@ -50,7 +51,7 @@ const Purses = () => {
     const explore = useRef(null)
 
     const [newPurseData, setNewPurseData] = useState({
-        amount: "0",
+        amount: "",
         numberOfMembers: 2,
         frequency: 1,
         collateral: "0"
@@ -95,29 +96,57 @@ const Purses = () => {
 
     const onChangeAmount = (e) => {
         const value = e.target.value;
-        if(newPurseData.amount === "0") {
-            const collateral = parseFloat(value.charAt(value.length-1)) * Number(newPurseData.numberOfMembers);
-            setNewPurseData({...newPurseData, amount: value.charAt(value.length-1), collateral: collateral.toString()})
-            return;
 
+        if(value === "") {
+
+            const collateral = "";
+            setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()});
+            return
+
+        } else if(Number(value) > 0) {
+            if(newPurseData.numberOfMembers === "") {
+                const collateral = "";
+                setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()})
+                return;
+            }
+            const collateral = parseFloat(value) * (Number(newPurseData.numberOfMembers) - 1);
+            setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()})
+            return;
+        } else if(Number(value) > 0) {
+            const collateral = parseFloat(value) * (Number(newPurseData.numberOfMembers) - 1);
+            setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()})
         }
-        const collateral = (parseFloat(value) * Number(newPurseData.numberOfMembers)) || 0;
-        setNewPurseData({...newPurseData, amount: value, collateral: collateral.toString()});
+
+        
         
     }
 
 
     const onChangeNumberOfMember = (e) => {
+
         const value = e.target.value;
-        if(value === "0" && newPurseData.numberOfMembers === "") {
 
-            const collateral = parseFloat(newPurseData.amount) * Number(value.charAt(value.length-1)) || 0;
-            setNewPurseData({...newPurseData, numberOfMembers: value.charAt(value.length-1), collateral: collateral.toString()})
+        if(value === "") {
+
+            const collateral = "";
+            setNewPurseData({...newPurseData, numberOfMembers: value, collateral: collateral.toString()});
             return
-        } 
 
-        const collateral = (parseFloat(newPurseData.amount) * Number(value) || 0);
-        setNewPurseData({...newPurseData, numberOfMembers: value, collateral: collateral.toString()})
+        } else if(Number(value) >= 1) {
+
+            if(newPurseData.amount === "") {
+
+                const collateral = "";
+                setNewPurseData({...newPurseData, numberOfMembers: value, collateral: collateral.toString()})
+                return;
+
+            }
+
+            const collateral = parseFloat(newPurseData.amount) * (Number(value) - 1);
+            setNewPurseData({...newPurseData, numberOfMembers: value, collateral: collateral.toString()})
+
+        }
+
     }
 
     const onChangeFrequency = (e) => {
@@ -150,15 +179,15 @@ const Purses = () => {
        
         await createPurse(newPurseData.amount, newPurseData.collateral, newPurseData.numberOfMembers, newPurseData.frequency);
     }
-
     
 
     useEffect(() => {
 
         // instantiating the purseFactory contract
-        if (!!library && typeof purseFactoryAddress !== 'undefined') {
+        if (!!library) {
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library);
 
+            
             (async () => {
 
                 try {
@@ -167,7 +196,7 @@ const Purses = () => {
                     
                     const purses = []
 
-                    if(!allPurseAddress.length) return setDisplayPurseSkeletons(false);
+                    if(!allPurseAddress.length) return setDisplayPurseSkeletons(false); // this will only be true when no purse has been created by the purse factory
 
                     allPurseAddress.forEach(purseAddress => {
                         const purseContractInstance = new ethers.Contract(purseAddress, purseAbi, library);
@@ -205,9 +234,60 @@ const Purses = () => {
                     })
 
                 } catch(err) {
-                    console.log(err)
+                    setDisplayPurseSkeletons(false);
+                    NotificationManager.error('Something went wrong', 'Cannot get purses', 3000, () => {}, true);
                 }
             })();
+
+            // listen for event here
+            purseFactoryContractInstance.on('PurseCreated', () => {
+
+                // to be changed in to a function later
+                (async () => {
+                    try {
+                        const allPurseAddress = await purseFactoryContractInstance.allPurse();
+                        
+                        const purses = []
+
+                        allPurseAddress.forEach(purseAddress => {
+                            const purseContractInstance = new ethers.Contract(purseAddress, purseAbi, library);
+        
+                            Promise.all([
+                                purseContractInstance.check_creation_date(),
+                                purseContractInstance.deposit_amount(),
+                                purseContractInstance.max_member_num(),
+                                purseContractInstance.required_collateral(),
+                                purseContractInstance.total_contribution(),
+                                purseContractInstance.view_Members(),
+                                purseContractInstance.bentoBox_balance(),
+                                purseContractInstance.check_time_interval()
+                            ]).then(data => {
+                                purses.push({
+                                    id: purseAddress,
+                                    dayCreated: convertCreatedDay(data[0]),
+                                    members: data[5],
+                                    maxMember: data[2].toString(),
+                                    amount: ethers.utils.formatEther(data[1]),
+                                    collateral: ethers.utils.formatEther(data[3]),
+                                    totalContrbution: ethers.utils.formatEther(data[4]),
+                                    open: data[5].length < data[2],
+                                    frequency: data[7].toString(),
+                                    bentoBoxBal: data[6].toString()
+                                })
+
+                                if(purses.length === allPurseAddress.length)  {
+                                    setPurseArray(purses);
+                                    setDisplayPurseSkeletons(false);
+                                }
+                            })
+        
+                            
+                        })
+                    }catch(err) {
+                        console.log(err)
+                    }
+                })()
+            })
         } else {
             (async () => {
                 // this will fire this useEffect again because library will be changed
@@ -237,13 +317,13 @@ const Purses = () => {
 
     const createPurse = async (contributionAmount, collateral, maxMember, frequency) => {
 
-        if(!contributionAmount || !collateral || !maxMember || !frequency) return;
+        if(!contributionAmount || !collateral || !maxMember || !frequency) return NotificationManager.error('Please fill all the fields appropriately', 'Error!', 3000, () => {}, true);
 
 
         if (!library && typeof purseFactoryAddress == 'undefined') return;
 
 
-        const contributionAmountWEI = ethers.utils.parseEther(contributionAmount.toString(),)
+        const contributionAmountWEI = ethers.utils.parseEther(contributionAmount.toString())
 
         const collateralWEI = ethers.utils.parseEther(collateral.toString())
 
@@ -253,7 +333,7 @@ const Purses = () => {
             await approve(purseFactoryAddress, Number(contributionAmount) + Number(collateral))
 
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library.getSigner());
-            const createPurseTx = await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency);
+            const createPurseTx = await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency, { gasPrice: 1000000000, gasLimit: 6000000,});
             
             const txHash = await library.getTransaction(createPurseTx.hash);
             if(!txHash) return setLoaderState(false);
@@ -273,6 +353,7 @@ const Purses = () => {
             }
             
         }catch(err) {
+            console.log("Here: ", err)
             setLoaderState(false);
             NotificationManager.error('Something went wrong','Error!', 3000, () => {}, true)
         }
@@ -306,7 +387,7 @@ const Purses = () => {
             setLoaderState(false);
 
             if (txReceipt && txReceipt.blockNumber) {
-                NotificationManager.success('Join a purse successfully', 'Success!', 3000, () => {}, true);
+                NotificationManager.success('Joind a purse successfully', 'Success!', 3000, () => {}, true);
             } else {
                 NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
             }
@@ -366,6 +447,7 @@ const Purses = () => {
         }
 
         setContent(filtered)
+        // eslint-disable-next-line
     }, [activeTab, purseArray])
 
     useEffect(() => {
