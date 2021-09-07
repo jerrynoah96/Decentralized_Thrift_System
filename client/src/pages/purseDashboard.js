@@ -98,6 +98,10 @@ const PurseDashboard = () => {
                 setLoaderState(false);
 
                 if (txReceipt && txReceipt.blockNumber) {
+                    
+                    // this line and the rest to be removed when event is in place
+                    const newBentoBoxBal = await purseContractInstance.bentoBox_balance();
+                    if(!!newBentoBoxBal) setDashboardData({...dashboardData, bentoBoxBal: newBentoBoxBal.toString()});
                     NotificationManager.success('Funds moved to Bentobox', 'Success!', 3000, () => {}, true);
                 } else {
                     NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
