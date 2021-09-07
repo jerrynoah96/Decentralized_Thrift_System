@@ -63,7 +63,7 @@ const DashboardOverview = ({maxMember, availableMember, dayCreated, totalCollate
                     </div>
                     <div className = "details-container">
                         <p className = "key">Total Collateral</p>
-                        <p className = "value">{totalCollateral} DAI</p>
+                        <p className = "value">{Number(totalCollateral) * Number(availableMember)} DAI</p>
                     </div>
                 </div>                
             </div>
