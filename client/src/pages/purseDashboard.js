@@ -74,6 +74,9 @@ const PurseDashboard = () => {
 
     const MoveFundsToBentoBox = async (e) => {
         e.preventDefault();
+
+        if(dashboardData.members.length < dashboardData.maxMember) return  NotificationManager.error('Members to be in purse are yet to be completed', 'Error!', 3000, () => {}, true);
+
         // instantiating the purseFactory contract
         if (!!library && typeof dashboardData.id !== 'undefined') {
             const purseContractInstance = new ethers.Contract(dashboardData.id, purseAbi, library.getSigner());
@@ -92,7 +95,7 @@ const PurseDashboard = () => {
                 setLoaderState(false);
 
                 if (txReceipt && txReceipt.blockNumber) {
-                    NotificationManager.success('funds moved to Bentobox', 'Success!', 3000, () => {}, true);
+                    NotificationManager.success('Funds moved to Bentobox', 'Success!', 3000, () => {}, true);
                 } else {
                     NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
                 }
@@ -103,7 +106,7 @@ const PurseDashboard = () => {
            
         }
     }
-
+    // for validating address input to vote for members
     const isAllowableEtheruemCharacter = (e) => {
 
         const charCode = (e.which) ? e.which : e.keyCode;
