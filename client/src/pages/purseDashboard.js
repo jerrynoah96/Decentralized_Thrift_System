@@ -28,6 +28,8 @@ const PurseDashboard = () => {
     const [dashboardData, setDashboardData] = useState({})
     const [VotedMemberAddress, setVotedMemberAddress] = useState("")
     const [displayPurseMembersList, setDisplayPurseMembersList] = useState(false)
+    // every member and his depoite
+    const [memberToDeposite, setMemberToDeposite] = useState([])
 
     const overviewLink = useRef(null);
     const chatRoomLink = useRef(null)
@@ -74,6 +76,10 @@ const PurseDashboard = () => {
 
     const MoveFundsToBentoBox = async (e) => {
         e.preventDefault();
+
+        if(dashboardData.members.length < dashboardData.maxMember) return  NotificationManager.error('Members to be in purse are yet to be completed', 'Error!', 3000, () => {}, true);
+
+        if(parseFloat(dashboardData.bentoBoxBal) > 0) return  NotificationManager.error('Collateral is already  moved to BentoBox', 'Funds has been moved!', 3000, () => {}, true);
         // instantiating the purseFactory contract
         if (!!library && typeof dashboardData.id !== 'undefined') {
             const purseContractInstance = new ethers.Contract(dashboardData.id, purseAbi, library.getSigner());
@@ -92,7 +98,11 @@ const PurseDashboard = () => {
                 setLoaderState(false);
 
                 if (txReceipt && txReceipt.blockNumber) {
-                    NotificationManager.success('funds moved to Bentobox', 'Success!', 3000, () => {}, true);
+                    
+                    // this line and the rest to be removed when event is in place
+                    const newBentoBoxBal = await purseContractInstance.bentoBox_balance();
+                    if(!!newBentoBoxBal) setDashboardData({...dashboardData, bentoBoxBal: newBentoBoxBal.toString()});
+                    NotificationManager.success('Funds moved to Bentobox', 'Success!', 3000, () => {}, true);
                 } else {
                     NotificationManager.error('Something went wrong', 'Error!', 3000, () => {}, true)
                 }
@@ -103,7 +113,7 @@ const PurseDashboard = () => {
            
         }
     }
-
+    // for validating address input to vote for members
     const isAllowableEtheruemCharacter = (e) => {
 
         const charCode = (e.which) ? e.which : e.keyCode;
@@ -228,9 +238,33 @@ const PurseDashboard = () => {
 
         const purse = purseArray.find(currentPurse => currentPurse.id === id)
 
-        if(!purse || !purse.members.includes(account)) history.push("/app/purses")
+        if(!purse || !purse.members.includes(account)) return history.push("/app/purses")
         
         setDashboardData(purse);
+
+        if (!!library && typeof purse.id !== 'undefined') { //used purse object here because we cant be sure the dashboardData has been updated by now
+            
+            const purseContractInstance = new ethers.Contract(purse.id, purseAbi, library.getSigner());
+
+            const depositeData = [];
+            purse.members.forEach( async member => {
+
+                try {
+                    const amount = await purseContractInstance.viewMemberTotalDeposit(member);
+
+                    depositeData.push({
+                        member,
+                        amount: ethers.utils.formatEther(amount.toString())
+                    })
+                } catch(err) {
+                    // console.log(err)
+                }
+                
+
+                if(depositeData.length === purse.members.length) setMemberToDeposite(depositeData);
+            })
+
+        }
 
         // eslint-disable-next-line
     }, [])
@@ -253,7 +287,7 @@ const PurseDashboard = () => {
                     <h1 className = "dashboard-title">DASHBOARD</h1>
                     {dashboardData.id && <div className = "info">
                     <h3 className = "purse-id">PURSE ID: {`${dashboardData.id.substr(0,6)}...${dashboardData.id.substr(dashboardData.id.length-4, id.length)}`}</h3>
-                    <h3 className = "bentoBox-bal">Bal of BentoBox: {dashboardData.bentoBoxBal} DAI</h3>
+                    <h3 className = "bentoBox-bal">Bal of BentoBox: {ethers.utils.formatEther(dashboardData.bentoBoxBal)} DAI</h3>
                     </div>
                     }
                     <button onClick = {MoveFundsToBentoBox} className = "to-bentoBox">Move funds to bentoBox <img className = "bento-logo" alt = "bentBox logo" src = "https://raw.githubusercontent.com/sushiswap/sushi-content/master/products/bento-color.png" /></button>
@@ -261,7 +295,7 @@ const PurseDashboard = () => {
                 <main className = "main-content">
                     {activeTab === "overview" && dashboardData.id && <DashboardOverview maxMember = {dashboardData.maxMember} availableMember = {dashboardData.members.length} dayCreated = {dashboardData.dayCreated} totalCollateral = {dashboardData.collateral} />}
                     {activeTab === "chat-room" && <PurseDiscussion />}
-                    {activeTab === "actions" && <PurseActions VotedMemberAddress = {VotedMemberAddress} onChangeMemberWallettAddress = {onChangeMemberWallettAddress} isAllowableEtheruemCharacter = {isAllowableEtheruemCharacter} onPasteToTokenContractAddress = {onPasteToTokenContractAddress} onVoteToDisburseFund = {onVoteToDisburseFund} deposite = {deposite} />}
+                    {activeTab === "actions" && <PurseActions VotedMemberAddress = {VotedMemberAddress} onChangeMemberWallettAddress = {onChangeMemberWallettAddress} isAllowableEtheruemCharacter = {isAllowableEtheruemCharacter} onPasteToTokenContractAddress = {onPasteToTokenContractAddress} onVoteToDisburseFund = {onVoteToDisburseFund} deposite = {deposite} depositeHistory = {memberToDeposite} />}
                 </main>
             </div>
             {displayPurseMembersList && dashboardData.id && <PurseMembersListModal members = {dashboardData.members} dismissModal = {onDisplayPurseMembersList} />}

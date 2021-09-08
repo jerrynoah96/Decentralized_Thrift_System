@@ -22,22 +22,24 @@
   width: 100%;
   display: flex;
   justify-content: space-evenly;
-  padding-bottom: 1rem;
+  padding: 0.5rem 0;
   align-items: center;
+  background-color: var(--river-bed);
 }
 
 .message-input {
   width: 60%;
-  padding: 1rem;
+  padding: 0.8rem;
   border-radius: 0.2rem;
-  background-color: var(--river-bed);
   border: none;
-  color: var(--french-gray);
+  color: var(--ebony-clay);
+  background-color: var(--french-gray);
 }
 
 .send-message-input {
-  width: 10%;
-  padding: 0.6rem;
+  width: 4rem;
+  padding: 0.8rem;
   border-radius: 0.2rem;
-  font-size: 1.5rem;
+  font-weight: bold;
+  background-color: var(--ebony-clay);
 }
