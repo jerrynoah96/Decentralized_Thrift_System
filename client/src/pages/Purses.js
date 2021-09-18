@@ -275,10 +275,9 @@ const Purses = () => {
                                     bentoBoxBal: data[6].toString()
                                 })
 
-                                if(purses.length === allPurseAddress.length)  {
-                                    setPurseArray(purses);
-                                    setDisplayPurseSkeletons(false);
-                                }
+                                setPurseArray(purses);
+                                setDisplayPurseSkeletons(false);
+                                
                             })
         
                             
@@ -461,7 +460,7 @@ const Purses = () => {
     return (
         <div className="purses container">
             <div className="header">
-                <h1 className="header-text">Cooperative Purses</h1>
+                <h1 className="header-text">Thrift Purses</h1>
                 <button className="create-new-purse" onClick={onPresentCreateNewPurseModal}>Create New <BsPlusCircle className="create-new-purse-icon" /></button>
                 <ul className="purses-nav">
                     <li className={activeTab === "myPurses" ? "nav-item active-nav-item" : "nav-item"} id="myPurses" ref={myPurses} onClick={onChangeTab}><GiWallet className="nav-icon" /> My Purses</li>

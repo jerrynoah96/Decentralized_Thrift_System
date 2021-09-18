@@ -14,31 +14,43 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.4rem;
+  font-size: 1rem;
   font-weight: 900;
   margin-bottom: 2rem;
 }
 
 .purse-deposite-history-modal .history-container th {
-  text-align: left;
+  /* text-align: left; */
   white-space: nowrap;
-  margin-bottom: 1rem;
+  width: calc(100% / 4);
+  margin: 0.5rem 1rem;
 }
+
+.purse-deposite-history-modal .history-container th:first-of-type {
+  margin-left: 0;
+}
+
+.purse-deposite-history-modal .history-container th:last-of-type {
+  margin-right: 0;
+}
+
 .purse-deposite-history-modal .history-container tr {
   display: flex;
   justify-content: space-between;
 }
 
 .purse-deposite-history-modal .history-container td {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0;
+  width: calc(100% / 4);
+  margin: 0.5rem 1rem;
 }
 
-.purse-deposite-history-modal .history-container td.member {
-  padding-left: 0;
+.purse-deposite-history-modal .history-container td:first-of-type {
+  margin-left: 0;
 }
 
-.purse-deposite-history-modal .history-container td.amount {
-  padding-right: 0;
+.purse-deposite-history-modal .history-container td:last-of-type {
+  margin-right: 0;
 }
 
 .purse-deposite-history-modal .history-container tbody tr {
