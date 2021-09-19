@@ -250,18 +250,26 @@ const PurseDashboard = () => {
             purse.members.forEach( async member => {
 
                 try {
-                    const amount = await purseContractInstance.viewMemberTotalDeposit(member);
 
-                    depositeData.push({
-                        member,
-                        amount: ethers.utils.formatEther(amount.toString())
-                    })
+                    Promise.all([
+                        purseContractInstance.viewMemberTotalDeposit(member),
+                        purseContractInstance.view_if_member_has_recieved_fund(member),
+                        purseContractInstance.view_Votes_for_member(member)
+                    ]).then(data => {
+                        depositeData.push({
+                            member,
+                            amount: ethers.utils.formatEther(data[0]),
+                            hasRecievedFunds: data[1],
+                            voteCount: Number(data[2])
+                        })
+
+
+                    setMemberToDeposite(depositeData);
+
+                    }).catch(err => console.log(err))
                 } catch(err) {
-                    // console.log(err)
+                    console.log(err)
                 }
-                
-
-                if(depositeData.length === purse.members.length) setMemberToDeposite(depositeData);
             })
 
         }

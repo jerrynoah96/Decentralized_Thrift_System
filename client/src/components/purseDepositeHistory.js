@@ -21,15 +21,19 @@ const PurseDepositeHistory = ({dismissModal, depisteHistory}) => {
                         <thead>
                             <tr>
                             <th>Address</th>
-                            <th>Total Deposited</th>
+                            <th>Total deposited</th>
+                            <th>Vote count</th>
+                            <th>Has recieved</th>
                             </tr>
                         </thead>
                         <tbody>
                             {depisteHistory.map((data, index) => {
                                 return (
                                     <tr key = {index}>
-                                        <td className = "member">{`${data.member.substr(0,12)}...${data.member.substr(data.member.length-10, data.member.length)}`}</td>
+                                        <td className = "member">{`${data.member.substr(0,6)}...${data.member.substr(data.member.length-4, data.member.length)}`}</td>
                                         <td className = "amount">{data.amount} DAI</td>
+                                        <td className = "amount">{data.voteCount}</td>
+                                        <td className = "amount">{data.hasRecievedFunds ? "true" : "false"}</td>
                                     </tr>
                                 );
                             })}
