@@ -20,9 +20,13 @@
 }
 
 .purse-deposite-history-modal .history-container th {
-  text-align: left;
+  
   white-space: nowrap;
   margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  
+
 }
 .purse-deposite-history-modal .history-container tr {
   display: flex;
@@ -31,8 +35,23 @@
 
 .purse-deposite-history-modal .history-container td {
   padding: 0.5rem 1rem;
+  text-align: center;
 }
-
+.table-heading{
+  display: flex !important;
+  padding: 0 !important;
+  justify-content: space-evenly;
+  justify-content: space-around !important;
+  width: 100%;
+  font-weight: 400;
+ 
+}
+.table-data{
+  display: flex !important;
+  justify-content: space-between !important;
+  justify-content: space-around !important;
+  
+}
 .purse-deposite-history-modal .history-container td.member {
   padding-left: 0;
 }

@@ -51,9 +51,6 @@
   border: 1px solid var(--silver-tree);
 }
 
-.header-container .user-section {
-}
-
 .header-container .user-section button {
   background-color: var(--bunker);
   border: 0;
@@ -68,6 +65,13 @@
 
 .header-container .user-section button:hover {
   opacity: 1;
+}
+
+.faucet-link{
+  color: var(--silver-tree);
+  text-decoration: none;
+  border: none !important;
+  font-weight: bold;
 }
 
 @media only screen and (max-width: 768px) {

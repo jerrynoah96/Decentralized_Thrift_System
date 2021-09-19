@@ -22,8 +22,8 @@ const PurseActions = ({VotedMemberAddress, onChangeMemberWallettAddress, onPaste
             <div className = "deposite-section">
                 <h2 className = "deposite-heading">Deposite for the next round</h2>
                 <p className = "deposite-text">It's time for another round of deposite</p>
-                <button onClick = {deposite} className = "deposite-btn">DEPOSITE NOW</button>
-                <button className = "deposite-history-btn" onClick = {onDisplayDepositeHistory}>DEPOSITE HISTORY</button>
+                <button onClick = {deposite} className = "deposite-btn">DEPOSIT NOW</button>
+                <button className = "deposite-history-btn" onClick = {onDisplayDepositeHistory}>DEPOSIT HISTORY</button>
             </div>
             <form className = "disburse-fund-section">
                 <h2 className = "vote-heading">Vote to disburse fund to a Member</h2>

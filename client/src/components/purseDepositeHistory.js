@@ -19,7 +19,7 @@ const PurseDepositeHistory = ({dismissModal, depisteHistory}) => {
                 <div className = "history-container">
                     <table border = "1">
                         <thead>
-                            <tr>
+                            <tr className="table-heading">
                             <th>Address</th>
                             <th>Total Deposited</th>
                             </tr>
@@ -27,8 +27,8 @@ const PurseDepositeHistory = ({dismissModal, depisteHistory}) => {
                         <tbody>
                             {depisteHistory.map((data, index) => {
                                 return (
-                                    <tr key = {index}>
-                                        <td className = "member">{`${data.member.substr(0,12)}...${data.member.substr(data.member.length-10, data.member.length)}`}</td>
+                                    <tr className="table-data" key = {index}>
+                                        <td className = "member">{`${data.member.substr(0,6)}...${data.member.substr(data.member.length-5, data.member.length)}`}</td>
                                         <td className = "amount">{data.amount} DAI</td>
                                     </tr>
                                 );
