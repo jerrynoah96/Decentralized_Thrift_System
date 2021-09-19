@@ -16,7 +16,7 @@ const Home = () => {
             <SiLitecoin className = "crypto-icon ltc"/>
             <main className = "home-main">
                 <p className = "first-para">NO TRUST REQUIRED</p>
-                <h1 className = "main-header">Here it is, your truly Decentralized Cooperative</h1>
+                <h1 className = "main-header">Here it is, your truly Decentralized Thrift</h1>
                 <p className = "second-para">Create or join already created<br/>purse to quickly and easily meet your financial target</p>
                 <Link className = "launch-app-link-btn" to = "/app/purses">Launch App <AiOutlineDoubleRight className = "launch-app-icon"/></Link>
             </main>
