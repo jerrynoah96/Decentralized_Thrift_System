@@ -48,8 +48,11 @@ const AppHeader = ({handleDisplayWalletModal}) => {
                     <li>
                         <NavLink exact activeClassName = "active-navigation-link" to = "/app/purses">Purses</NavLink>
                     </li>
+
                 </ul>
             </nav>
+
+            <a className="faucet-link" href="https://rinkeby.etherscan.io/address/0x2394aaa7ae00f7320d5b0ffcd12e2510d00bec00#writeContract" target="_blank">Get test Dai </a>
             <div className = "user-section">
                 {account && balance ? <UserAccount balance = {parseFloat(balance).toFixed(2)} address = {account} /> : <button onClick = {handleDisplayWalletModal}>Connect wallet</button>}
                 
