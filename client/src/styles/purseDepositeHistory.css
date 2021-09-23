@@ -20,20 +20,10 @@
 }
 
 .purse-deposite-history-modal .history-container th {
-<<<<<<< HEAD
-  
-  white-space: nowrap;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  
-
-=======
   /* text-align: left; */
   white-space: nowrap;
   width: calc(100% / 4);
   margin: 0.5rem 1rem;
->>>>>>> b7c5a02d348e8930ff0100b93095eafc41ba55f2
 }
 
 .purse-deposite-history-modal .history-container th:first-of-type {
@@ -50,28 +40,6 @@
 }
 
 .purse-deposite-history-modal .history-container td {
-<<<<<<< HEAD
-  padding: 0.5rem 1rem;
-  text-align: center;
-}
-.table-heading{
-  display: flex !important;
-  padding: 0 !important;
-  justify-content: space-evenly;
-  justify-content: space-around !important;
-  width: 100%;
-  font-weight: 400;
- 
-}
-.table-data{
-  display: flex !important;
-  justify-content: space-between !important;
-  justify-content: space-around !important;
-  
-}
-.purse-deposite-history-modal .history-container td.member {
-  padding-left: 0;
-=======
   padding: 0.5rem 0;
   width: calc(100% / 4);
   margin: 0.5rem 1rem;
@@ -79,7 +47,6 @@
 
 .purse-deposite-history-modal .history-container td:first-of-type {
   margin-left: 0;
->>>>>>> b7c5a02d348e8930ff0100b93095eafc41ba55f2
 }
 
 .purse-deposite-history-modal .history-container td:last-of-type {
