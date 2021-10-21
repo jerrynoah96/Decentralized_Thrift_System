@@ -16,10 +16,11 @@ contract PurseFactory{
     uint256 public purse_count;
     address[] _list_of_purses;//this array contains addresss of each purse
     mapping(address=> uint256) id_to_purse;
+    mapping(address => uint256) public purseToChatId;
     
     
     
-    function createPurse(uint256 contribution_amount, uint256 _collateral, uint256 _max_member, uint256 time_interval)public {
+    function createPurse(uint256 contribution_amount, uint256 _collateral, uint256 _max_member, uint256 time_interval, uint256 chatId)public {
         PurseContract purse = new PurseContract(msg.sender, contribution_amount, _collateral, _max_member, time_interval);
         //purse factory contract should be approved
         require(tokenInstance.transferFrom(msg.sender, address(this), (_collateral + contribution_amount)), 'transfer to token factory not successful');
@@ -28,6 +29,7 @@ contract PurseFactory{
         _list_of_purses.push(address(purse));
         purse_count = purse_count++;
         id_to_purse[address(purse)] = purse_count;
+        purseToChatId[address(purse)] = chatId;
         
         emit PurseCreated(msg.sender, contribution_amount, _max_member, block.timestamp);
     }

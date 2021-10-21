@@ -51,6 +51,11 @@
 				"internalType": "uint256",
 				"name": "time_interval",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "chatId",
+				"type": "uint256"
 			}
 		],
 		"name": "createPurse",
@@ -74,6 +79,25 @@
 	{
 		"inputs": [],
 		"name": "purse_count",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "purseToChatId",
 		"outputs": [
 			{
 				"internalType": "uint256",
