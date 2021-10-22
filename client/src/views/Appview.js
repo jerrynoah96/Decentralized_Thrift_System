@@ -10,6 +10,7 @@ import WalletsModal from "../components/walletsModal"
 import {useWeb3React, UnsupportedChainIdError} from '@web3-react/core'
 import { useEagerConnect, useInactiveListener } from '../hooks'
 import PurseContextProvider from "../context/purseContext"
+import AppContextProvider from "../context/appContext"
 import {LoaderContext} from "../context/loaderContext";
 import Loader from "../components/loader"
 import {NotificationContainer, NotificationManager} from 'react-notifications';
@@ -35,7 +36,7 @@ function getErrorMessage(error) {
   ) {
     return {
         title: 'Connection denined!',
-        message: "Please authorize this website to access your Ethereum account."
+        message: "Please authorize this dApp to access your Ethereum account."
     }
   } else {
     console.error(error)
@@ -146,19 +147,21 @@ const AppView = () => {
 
               
                 {!onDashboard && <AppHeader handleDisplayWalletModal = {handleDisplayWalletModal} />}
-                <PurseContextProvider>
-                    <Switch>
-                        <Route exact path = "/app/swap">
-                            <Swap handleDisplayWalletModal = {handleDisplayWalletModal} />
-                        </Route>
-                        <Route exact path = "/app/purses">
-                            <Purses />
-                        </Route>
-                        <Route exact path = "/app/purse/:id">
-                            <PurseDasboard />
-                        </Route>
-                    </Switch>
-                </PurseContextProvider>
+                <AppContextProvider>
+                  <PurseContextProvider>
+                      <Switch>
+                          <Route exact path = "/app/swap">
+                              <Swap handleDisplayWalletModal = {handleDisplayWalletModal} />
+                          </Route>
+                          <Route exact path = "/app/purses">
+                              <Purses />
+                          </Route>
+                          <Route exact path = "/app/purse/:id">
+                              <PurseDasboard />
+                          </Route>
+                      </Switch>
+                  </PurseContextProvider>
+                </AppContextProvider>
                 
                 {showWalletModal && <WalletsModal dismissModal = {handleDisplayWalletModal} />}
                 {loaderState && <Loader />}

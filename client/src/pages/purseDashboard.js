@@ -16,6 +16,7 @@ import {NotificationManager} from 'react-notifications';
 import tokenAbi from "../ABI/tokenAbi.json"
 
 
+
 const PurseDashboard = () => {
     
     const {id} = useParams()
@@ -30,6 +31,7 @@ const PurseDashboard = () => {
     const [displayPurseMembersList, setDisplayPurseMembersList] = useState(false)
     // every member and his depoite
     const [memberToDeposite, setMemberToDeposite] = useState([])
+
 
     const overviewLink = useRef(null);
     const chatRoomLink = useRef(null)
@@ -302,7 +304,7 @@ const PurseDashboard = () => {
                 </div>
                 <main className = "main-content">
                     {activeTab === "overview" && dashboardData.id && <DashboardOverview maxMember = {dashboardData.maxMember} availableMember = {dashboardData.members.length} dayCreated = {dashboardData.dayCreated} totalCollateral = {dashboardData.collateral} />}
-                    {activeTab === "chat-room" && <PurseDiscussion />}
+                    {activeTab === "chat-room" && <PurseDiscussion address = {account} />}
                     {activeTab === "actions" && <PurseActions VotedMemberAddress = {VotedMemberAddress} onChangeMemberWallettAddress = {onChangeMemberWallettAddress} isAllowableEtheruemCharacter = {isAllowableEtheruemCharacter} onPasteToTokenContractAddress = {onPasteToTokenContractAddress} onVoteToDisburseFund = {onVoteToDisburseFund} deposite = {deposite} depositeHistory = {memberToDeposite} />}
                 </main>
             </div>
