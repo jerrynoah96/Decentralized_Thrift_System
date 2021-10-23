@@ -24,7 +24,7 @@ import {network} from '../connectors'
 const Purses = () => {
 
     const tokenAddress = "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735";
-    const purseFactoryAddress= "0x393F5A27Dae62C75A7D9343ae93d955398F211AF";
+    const purseFactoryAddress= "0x64c3345dEA7D3F59106ACAec9E0867A7764d5665";
 
     const { library, account, activate } = useWeb3React();
 
@@ -216,7 +216,8 @@ const Purses = () => {
                             purseContractInstance.total_contribution(),
                             purseContractInstance.view_Members(),
                             purseContractInstance.bentoBox_balance(),
-                            purseContractInstance.check_time_interval()
+                            purseContractInstance.check_time_interval(),
+                            purseFactoryContractInstance.purseToChatId(purseAddress) // getting chatId here
                         ]).then(data => {
                             purses.push({
                                 id: purseAddress,
@@ -228,7 +229,8 @@ const Purses = () => {
                                 totalContrbution: ethers.utils.formatEther(data[4]),
                                 open: data[5].length < data[2],
                                 frequency: data[7].toString(),
-                                bentoBoxBal: data[6].toString()
+                                bentoBoxBal: data[6].toString(),
+                                chatId: Number(data[8])
                             })
 
                             if(purses.length === allPurseAddress.length)  {
@@ -268,7 +270,7 @@ const Purses = () => {
                                 purseContractInstance.view_Members(),
                                 purseContractInstance.bentoBox_balance(),
                                 purseContractInstance.check_time_interval(),
-                                purseFactoryContractInstance.purseTochatId(purseAddress) // getting chatId here
+                                purseFactoryContractInstance.purseToChatId(purseAddress) // getting chatId here
                             ]).then(data => {
                                 purses.push({
                                     id: purseAddress,
@@ -281,7 +283,7 @@ const Purses = () => {
                                     open: data[5].length < data[2],
                                     frequency: data[7].toString(),
                                     bentoBoxBal: data[6].toString(),
-                                    chatId: data[8]
+                                    chatId: Number(data[8])
                                 })
 
                                 setPurseArray(purses);
@@ -337,16 +339,24 @@ const Purses = () => {
 
 
         try {
+            setLoaderState(true);
             // get user if exist or create if not
             const userResponse =  await fetch("http://localhost:8000/api/user/get-or-create", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({walletId: account})
+                body: JSON.stringify({username: account})
             })
 
+            console.log("create user::::::: ", userResponse)
+
+            if(userResponse.status !== 200) throw "error getting or creating user"
+
             const userData = await userResponse.json()
+        
+
+            
 
             const username = userData.username;
 
@@ -362,7 +372,12 @@ const Purses = () => {
                 })
             })
 
+            if(chatResponse.status !== 200) throw "error creating chat"
+
+
             const chatData = await chatResponse.json();
+
+            
 
             await approve(purseFactoryAddress, (Number(contributionAmount) + Number(collateral)))
 
@@ -401,7 +416,7 @@ const Purses = () => {
         const contributionAmountWEI = ethers.utils.parseEther(currentlyDisplayedPurseDetails.amount.toString(),)
         const collateralWEI = ethers.utils.parseEther(currentlyDisplayedPurseDetails.collateral.toString())
         try {
-
+            setLoaderState(true);
             // get user if exist or create if not
             const userResponse =  await fetch("http://localhost:8000/api/user/get-or-create", {
                 method: "POST",
@@ -411,7 +426,12 @@ const Purses = () => {
                 body: JSON.stringify({username: account})
             })
 
+            console.log("get or create user: ", userResponse)
+
+            if(userResponse.status !== 200) throw "error getting or creating user"
+
             const userData = await userResponse.json()
+
 
             // add this user to the purse chat
             const chatResponse =  await fetch("http://localhost:8000/api/chat/add-member", {
@@ -420,11 +440,15 @@ const Purses = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    chat_id: currentlyDisplayedPurseDetails.ChatId,
+                    chat_id: currentlyDisplayedPurseDetails.chatId,
                     username: userData.username,
                     adminUsername: currentlyDisplayedPurseDetails.members[0]
                 })
             })
+
+            console.log("add to chat: ", chatResponse)
+
+            if(chatResponse.status !== 200) throw "error creating chat"
 
 
 
