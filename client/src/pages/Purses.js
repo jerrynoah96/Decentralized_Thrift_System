@@ -19,6 +19,7 @@ import PurseCardSkeleton from "../components/purseCardSkeleton";
 import {LoaderContext} from "../context/loaderContext";
 import {NotificationManager} from 'react-notifications';
 import {network} from '../connectors'
+import { SERVER_HOST } from "../utils/appValues"
 
 
 const Purses = () => {
@@ -340,8 +341,9 @@ const Purses = () => {
 
         try {
             setLoaderState(true);
+
             // get user if exist or create if not
-            const userResponse =  await fetch("http://localhost:8000/api/user/get-or-create", {
+            const userResponse =  await fetch(`${SERVER_HOST}api/user/get-or-create`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -349,25 +351,18 @@ const Purses = () => {
                 body: JSON.stringify({username: account})
             })
 
-            console.log("create user::::::: ", userResponse)
-
             if(userResponse.status !== 200) throw "error getting or creating user"
 
             const userData = await userResponse.json()
-        
-
-            
-
-            const username = userData.username;
 
             // create chat for the purese about to be created
-            const chatResponse =  await fetch("http://localhost:8000/api/chat/create", {
+            const chatResponse =  await fetch(`${SERVER_HOST}api/chat/create`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    walletId: username,
+                    walletId: userData.username,
                     chat_title: `thrift-${contributionAmount}DAI Chat`
                 })
             })
@@ -376,8 +371,6 @@ const Purses = () => {
 
 
             const chatData = await chatResponse.json();
-
-            
 
             await approve(purseFactoryAddress, (Number(contributionAmount) + Number(collateral)))
 
@@ -404,6 +397,18 @@ const Purses = () => {
         }catch(err) {
             setLoaderState(false);
             NotificationManager.error('Something went wrong','Error!', 3000, () => {}, true)
+            if(!chatData.id) return;
+            // if chatData.id exist, the chat has been created but the purse creation failed
+            // await fetch(`${SERVER_HOST}api/chat/delete`, {
+            //     method: "POST",
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         chatId: chatData.id,
+            //         adminUsername: userData.username
+            //     })
+            // })
         }
 
         
@@ -415,10 +420,20 @@ const Purses = () => {
         e.preventDefault();
         const contributionAmountWEI = ethers.utils.parseEther(currentlyDisplayedPurseDetails.amount.toString(),)
         const collateralWEI = ethers.utils.parseEther(currentlyDisplayedPurseDetails.collateral.toString())
+        
+        
         try {
+            // check if user has enough balance to join the purse
+            const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, library.getSigner());
+
+            const balanceInWei = await tokenInstance.balanceOf(account);
+            const balanceInEther = utils.formatEther(balanceInWei);
+
+            if((parseFloat(utils.formatEther(contributionAmountWEI)) + parseFloat(utils.formatEther(collateralWEI))) > balanceInEther) return NotificationManager.error('You do not have enough token to join this purse', 'Error!', 3000, () => {}, true);
+
             setLoaderState(true);
             // get user if exist or create if not
-            const userResponse =  await fetch("http://localhost:8000/api/user/get-or-create", {
+            const userResponse =  await fetch(`${SERVER_HOST}api/user/get-or-create`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -426,15 +441,13 @@ const Purses = () => {
                 body: JSON.stringify({username: account})
             })
 
-            console.log("get or create user: ", userResponse)
-
             if(userResponse.status !== 200) throw "error getting or creating user"
 
             const userData = await userResponse.json()
 
 
             // add this user to the purse chat
-            const chatResponse =  await fetch("http://localhost:8000/api/chat/add-member", {
+            const chatResponse =  await fetch(`${SERVER_HOST}api/chat/add-member`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -446,7 +459,6 @@ const Purses = () => {
                 })
             })
 
-            console.log("add to chat: ", chatResponse)
 
             if(chatResponse.status !== 200) throw "error creating chat"
 

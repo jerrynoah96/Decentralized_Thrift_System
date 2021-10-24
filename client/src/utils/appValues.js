@@ -1,0 +1,1 @@
+export const SERVER_HOST = "https://thrift-backend-server.herokuapp.com/"

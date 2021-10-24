@@ -1,26 +1,22 @@
-import { useContext } from 'react'
-import { ChatEngine, ChatEngineContext, ChatFeed } from 'react-chat-engine';
+import {Socket, ChatFeed } from 'react-chat-engine';
 import "../styles/purseDiscussion.css";
+import {ChatEngineWrapper} from 'react-chat-engine'
 
 const PurseDiscussion = ({address,  chatId}) => {
-    const chatEngineState = useContext(ChatEngineContext);
-    chatEngineState.setActiveChat(chatId)
-    console.log("chatengine state: ", chatEngineState)
     
     return(
         <div className = "discussion-container">
-            {/* <ChatEngine
-			projectID = {process.env.REACT_APP_CHATENGINE_PROJECT_ID}
-			userName = {address}
-			userSecret = {address}
-            // renderChatSettings={(creds, chat) => {}}
-            renderChatList={(chatAppState) => {}}
-		/> */}
-        <ChatFeed 
-            projectID = {process.env.REACT_APP_CHATENGINE_PROJECT_ID}
-			userName = {address}
-			userSecret = {address}
-        />
+            <ChatEngineWrapper>
+                <Socket 
+                    projectID={process.env.REACT_APP_CHATENGINE_PROJECT_ID}
+                    userName = {address}
+                    userSecret = {address}
+                />
+                <ChatFeed 
+                    activeChat = {chatId}
+                    renderChatHeader = {() => {}}
+                />
+            </ChatEngineWrapper>
         </div>
     );
 }
