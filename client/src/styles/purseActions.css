@@ -1,3 +1,6 @@
+.purse-actions {
+  padding: 0 1rem;
+}
 .disburse-fund-section,
 .deposite-section {
   background-color: var(--french-gray);

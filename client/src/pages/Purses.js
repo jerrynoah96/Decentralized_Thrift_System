@@ -10,7 +10,7 @@ import CreateNewPurseModal from "../components/createNewPurseModal"
 import { BsPlusCircle } from "react-icons/bs"
 import PurseCardsContainer from "../components/purseCardsContainer"
 import { useWeb3React } from '@web3-react/core'
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import purseFactoryAbi from "../ABI/purseFactoryAbi.json";
 import purseAbi from "../ABI/purseAbi.json"
 import tokenAbi from "../ABI/tokenAbi.json"
@@ -19,10 +19,13 @@ import PurseCardSkeleton from "../components/purseCardSkeleton";
 import {LoaderContext} from "../context/loaderContext";
 import {NotificationManager} from 'react-notifications';
 import {network} from '../connectors'
+import { SERVER_HOST } from "../utils/appValues"
 
 
 const Purses = () => {
 
+    const tokenAddress = "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735";
+    const purseFactoryAddress= "0x64c3345dEA7D3F59106ACAec9E0867A7764d5665";
 
     const { library, account, activate } = useWeb3React();
 
@@ -32,9 +35,6 @@ const Purses = () => {
 
     const {purseArray, setPurseArray} = useContext(PurseContext)
     const [displayPurseSkeletons, setDisplayPurseSkeletons] = useState(true)
-
-    const tokenAddress = "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735";
-    const purseFactoryAddress= "0x393F5A27Dae62C75A7D9343ae93d955398F211AF";
 
 
     const [activeTab, setActiveTab] = useState("myPurses")
@@ -52,8 +52,8 @@ const Purses = () => {
 
     const [newPurseData, setNewPurseData] = useState({
         amount: "",
-        numberOfMembers: 2,
-        frequency: 1,
+        numberOfMembers: 2, //default to two, the minimum number of members for a purse
+        frequency: 1, //at least  1 day frequency
         collateral: "0"
     })
 
@@ -176,6 +176,14 @@ const Purses = () => {
         if(Number(newPurseData.numberOfMembers) < 2) {
             return NotificationManager.error('number of members must be equal to or greater than 2', 'Error!', 4000, () => {}, true)
         }
+
+        // check if user has enough balance to create the purse
+        const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, library.getSigner());
+
+        const balanceInWei = await tokenInstance.balanceOf(account);
+        const balanceInEther = utils.formatEther(balanceInWei);
+
+        if((parseFloat(newPurseData.amount) + parseFloat(newPurseData.collateral)) > balanceInEther) return NotificationManager.error('You do not have enough token to create this purse', 'Error!', 3000, () => {}, true);
        
         await createPurse(newPurseData.amount, newPurseData.collateral, newPurseData.numberOfMembers, newPurseData.frequency);
     }
@@ -209,7 +217,8 @@ const Purses = () => {
                             purseContractInstance.total_contribution(),
                             purseContractInstance.view_Members(),
                             purseContractInstance.bentoBox_balance(),
-                            purseContractInstance.check_time_interval()
+                            purseContractInstance.check_time_interval(),
+                            purseFactoryContractInstance.purseToChatId(purseAddress) // getting chatId here
                         ]).then(data => {
                             purses.push({
                                 id: purseAddress,
@@ -221,7 +230,8 @@ const Purses = () => {
                                 totalContrbution: ethers.utils.formatEther(data[4]),
                                 open: data[5].length < data[2],
                                 frequency: data[7].toString(),
-                                bentoBoxBal: data[6].toString()
+                                bentoBoxBal: data[6].toString(),
+                                chatId: Number(data[8])
                             })
 
                             if(purses.length === allPurseAddress.length)  {
@@ -260,7 +270,8 @@ const Purses = () => {
                                 purseContractInstance.total_contribution(),
                                 purseContractInstance.view_Members(),
                                 purseContractInstance.bentoBox_balance(),
-                                purseContractInstance.check_time_interval()
+                                purseContractInstance.check_time_interval(),
+                                purseFactoryContractInstance.purseToChatId(purseAddress) // getting chatId here
                             ]).then(data => {
                                 purses.push({
                                     id: purseAddress,
@@ -272,7 +283,8 @@ const Purses = () => {
                                     totalContrbution: ethers.utils.formatEther(data[4]),
                                     open: data[5].length < data[2],
                                     frequency: data[7].toString(),
-                                    bentoBoxBal: data[6].toString()
+                                    bentoBoxBal: data[6].toString(),
+                                    chatId: Number(data[8])
                                 })
 
                                 setPurseArray(purses);
@@ -328,11 +340,42 @@ const Purses = () => {
 
 
         try {
+            setLoaderState(true);
 
-            await approve(purseFactoryAddress, Number(contributionAmount) + Number(collateral))
+            // get user if exist or create if not
+            const userResponse =  await fetch(`${SERVER_HOST}api/user/get-or-create`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({username: account})
+            })
+
+            if(userResponse.status !== 200) throw "error getting or creating user"
+
+            const userData = await userResponse.json()
+
+            // create chat for the purese about to be created
+            const chatResponse =  await fetch(`${SERVER_HOST}api/chat/create`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    walletId: userData.username,
+                    chat_title: `thrift-${contributionAmount}DAI Chat`
+                })
+            })
+
+            if(chatResponse.status !== 200) throw "error creating chat"
+
+
+            const chatData = await chatResponse.json();
+
+            await approve(purseFactoryAddress, (Number(contributionAmount) + Number(collateral)))
 
             const purseFactoryContractInstance = new ethers.Contract(purseFactoryAddress, purseFactoryAbi, library.getSigner());
-            const createPurseTx = await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency, { gasPrice: 1000000000, gasLimit: 6000000,});
+            const createPurseTx = await purseFactoryContractInstance.createPurse(contributionAmountWEI, collateralWEI, Number(maxMember), frequency, chatData.id, { gasPrice: 1000000000, gasLimit: 6000000,});
             
             const txHash = await library.getTransaction(createPurseTx.hash);
             if(!txHash) return setLoaderState(false);
@@ -352,9 +395,20 @@ const Purses = () => {
             }
             
         }catch(err) {
-            console.log("Here: ", err)
             setLoaderState(false);
             NotificationManager.error('Something went wrong','Error!', 3000, () => {}, true)
+            if(!chatData.id) return;
+            // if chatData.id exist, the chat has been created but the purse creation failed
+            // await fetch(`${SERVER_HOST}api/chat/delete`, {
+            //     method: "POST",
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         chatId: chatData.id,
+            //         adminUsername: userData.username
+            //     })
+            // })
         }
 
         
@@ -366,7 +420,50 @@ const Purses = () => {
         e.preventDefault();
         const contributionAmountWEI = ethers.utils.parseEther(currentlyDisplayedPurseDetails.amount.toString(),)
         const collateralWEI = ethers.utils.parseEther(currentlyDisplayedPurseDetails.collateral.toString())
+        
+        
         try {
+            // check if user has enough balance to join the purse
+            const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, library.getSigner());
+
+            const balanceInWei = await tokenInstance.balanceOf(account);
+            const balanceInEther = utils.formatEther(balanceInWei);
+
+            if((parseFloat(utils.formatEther(contributionAmountWEI)) + parseFloat(utils.formatEther(collateralWEI))) > balanceInEther) return NotificationManager.error('You do not have enough token to join this purse', 'Error!', 3000, () => {}, true);
+
+            setLoaderState(true);
+            // get user if exist or create if not
+            const userResponse =  await fetch(`${SERVER_HOST}api/user/get-or-create`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({username: account})
+            })
+
+            if(userResponse.status !== 200) throw "error getting or creating user"
+
+            const userData = await userResponse.json()
+
+
+            // add this user to the purse chat
+            const chatResponse =  await fetch(`${SERVER_HOST}api/chat/add-member`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: currentlyDisplayedPurseDetails.chatId,
+                    username: userData.username,
+                    adminUsername: currentlyDisplayedPurseDetails.members[0]
+                })
+            })
+
+
+            if(chatResponse.status !== 200) throw "error creating chat"
+
+
+
             await approve(currentlyDisplayedPurseDetails.id, Number(currentlyDisplayedPurseDetails.amount) + Number(currentlyDisplayedPurseDetails.collateral))
           
             const purseContractInstance = new ethers.Contract(currentlyDisplayedPurseDetails.id, purseAbi, library.getSigner());
