@@ -397,7 +397,7 @@ const Purses = () => {
         }catch(err) {
             setLoaderState(false);
             NotificationManager.error('Something went wrong','Error!', 3000, () => {}, true)
-            if(!chatData.id) return;
+          //  if(!chatData.id) return;
             // if chatData.id exist, the chat has been created but the purse creation failed
             // await fetch(`${SERVER_HOST}api/chat/delete`, {
             //     method: "POST",
