@@ -350,7 +350,7 @@ const Purses = () => {
                 },
                 body: JSON.stringify({username: account})
             })
-
+            // eslint-disable-next-line
             if(userResponse.status !== 200) throw "error getting or creating user"
 
             const userData = await userResponse.json()
@@ -366,7 +366,7 @@ const Purses = () => {
                     chat_title: `thrift-${contributionAmount}DAI Chat`
                 })
             })
-
+            // eslint-disable-next-line
             if(chatResponse.status !== 200) throw "error creating chat"
 
 
@@ -397,7 +397,7 @@ const Purses = () => {
         }catch(err) {
             setLoaderState(false);
             NotificationManager.error('Something went wrong','Error!', 3000, () => {}, true)
-            if(!chatData.id) return;
+            // if(!chatData.id) return; 
             // if chatData.id exist, the chat has been created but the purse creation failed
             // await fetch(`${SERVER_HOST}api/chat/delete`, {
             //     method: "POST",
@@ -440,7 +440,7 @@ const Purses = () => {
                 },
                 body: JSON.stringify({username: account})
             })
-
+            // eslint-disable-next-line
             if(userResponse.status !== 200) throw "error getting or creating user"
 
             const userData = await userResponse.json()
@@ -459,7 +459,7 @@ const Purses = () => {
                 })
             })
 
-
+            // eslint-disable-next-line
             if(chatResponse.status !== 200) throw "error creating chat"
 
 
