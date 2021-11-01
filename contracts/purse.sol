@@ -48,10 +48,10 @@ contract PurseContract{
     
 
     address[] purseMembers;
-    mapping(address=>uint256) memberToCollateral; //map a user tp ccollateral deposited
-    mapping(address=>uint256) memberToDeposit; //map a user to amount deposited- ofcourse all members will deposit same amount
+    mapping(address => uint256) memberToCollateral; //map a user tp ccollateral deposited
+    mapping(address => uint256) memberToDeposit; //map a user to amount deposited- ofcourse all members will deposit same amount
     mapping(address => bool) isPurseMember;//map a user's membership of a purse to true
-    mapping(address=> Purse) memberToPurse; //map user to all the purse he is invloved in
+    mapping(address => Purse) memberToPurse; //map user to all the purse he is invloved in
     mapping(address => bool) member_close_Purse_Vote;
     mapping(address => bool) member_reOpen_Purse_Vote;
     mapping(address => bool) member_terminate_PurseVote;
