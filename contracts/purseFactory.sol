@@ -15,7 +15,7 @@ contract PurseFactory{
      //0xf0169620C98c21341aBaAeaFB16c69629Dafc06b    
     uint256 public purse_count;
     address[] _list_of_purses;//this array contains addresss of each purse
-    mapping(address=> uint256) id_to_purse;
+    mapping(address => uint256) id_to_purse;
     mapping(address => uint256) public purseToChatId;
     
     
