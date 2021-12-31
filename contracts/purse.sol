@@ -60,7 +60,9 @@ contract PurseContract{
     mapping(address => mapping(address=> bool)) has_voted_for_member_to_recieve_Funds;
     mapping(address => uint256) contract_total_deposit_balance;//maps address of contract to deposits made by all members
     mapping(address => uint256) contract_total_collateral_balance;//maps address of contract to all collaterals
+    mapping(address => bool) approve_To_Claim_Without_Complete_Votes; // maps a user address to true to approve the user to claim even without complete votes
     
+   
     
     
     address _address_of_token = 0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735; //address of acceptable erc20 token - basically a stable coin DAI-rinkeby
@@ -110,8 +112,8 @@ contract PurseContract{
     }
     
     function joinPurse( uint256 _amount, uint _collateral) public {
-        require(purse.purseState == PurseState.Open, 'This purse is not longer accepting members');
-        require(isPurseMember[msg.sender] == false, 'you are already a member in this purse');
+        require(purse.purseState == PurseState.Open, "This purse is not longer accepting members");
+        require(isPurseMember[msg.sender] == false, "you are already a member in this purse");
         require(_amount == deposit_amount, 'You cannot deposit above or below the starting amount');
         require(_collateral == required_collateral, 'collateral should be deposit amount multiplied by (max expected member - 1)');
         tokenInstance.transferFrom(msg.sender, address(this), (_collateral + _amount));
@@ -155,8 +157,8 @@ contract PurseContract{
     
     //this function is called if members decided to let more persons join, so this function takes in parameter-which is the number to be allowed in
     function voteToReOpenPurse(uint256 _incrementInMember)public returns(bool){
-         require(purse.purseState == PurseState.Closed, 'This purse is still opened');
-         require(isPurseMember[msg.sender] == true, 'only members of this purse can vote to re open this purse');
+         require(purse.purseState == PurseState.Closed, "This purse is still opened");
+         require(isPurseMember[msg.sender] == true, "only members of this purse can vote to re open this purse");
           require(member_reOpen_Purse_Vote[msg.sender] == false, 'You have already voted, you cannot vote more than once to re oprn a purse');//check to ensure a member cant vote more than once to re open purse
          increment_in_membership = _incrementInMember;
          require(_incrementInMember == increment_in_membership, ' this does not look like the increment in members number your group agreed on');
@@ -175,7 +177,7 @@ contract PurseContract{
     
     //this function is after the first round, at this point, user doesnt need to deposit collateral
     function depositFunds() public {
-        require(isPurseMember[msg.sender] == true, 'only purse members please');
+        require(isPurseMember[msg.sender] == true, "only purse members please");
         tokenInstance.transferFrom(msg.sender, address(this), deposit_amount);
         memberToDeposit[msg.sender] += deposit_amount;
         contract_total_deposit_balance[address(this)]+= deposit_amount;
@@ -187,35 +189,62 @@ contract PurseContract{
     
     */
      function voteToDisburseFundstoMember(address _memberAddress) public returns(uint256){
-            require(isPurseMember[msg.sender] == true, 'only purse members please');
-            require(isPurseMember[_memberAddress] == true, 'This provided address is not a member');
-            require(member_has_recieved[_memberAddress] == false, 'this member has recieved a round of contribution already');
-            require(has_voted_for_member_to_recieve_Funds[msg.sender][_memberAddress] == false, 'You can not vote twice in this round for this address to recieve');
+            require(isPurseMember[msg.sender] == true, "only purse members please");
+            require(isPurseMember[_memberAddress] == true, "This provided address is not a member");
+            require(member_has_recieved[_memberAddress] == false, "this member has recieved a round of contribution already");
+            require(has_voted_for_member_to_recieve_Funds[msg.sender][_memberAddress] == false, "You can not vote twice in this round for this address to recieve");
             
             //increment vote for member to recieve funds
            votes_for_member_to_recieve_funds[_memberAddress] = votes_for_member_to_recieve_funds[_memberAddress]++;
-            
-            
-            if(votes_for_member_to_recieve_funds[_memberAddress] == purse.members.length){
-                //this if statemement checks that every member has voted for a member. the member himself too would have voted
-                //the funds then gets disbursed to himself
-                //disburse tokens in mapping - contract_total_deposit_balance to _memberAddress
-                
-                tokenInstance.transfer(_memberAddress, contract_total_deposit_balance[address(this)]);
-                num_of_members_who_has_recieved_funds++;
-                member_has_recieved[_memberAddress] = true;
-                contract_total_deposit_balance[address(this)] = 0;
-                
-            }
-
+        
         return votes_for_member_to_recieve_funds[_memberAddress];
-            //after disbursing funds, reset some mappings to enable members to deposit again for another round
+        
            
     }
 
-//any member can call this function
-    function deposit_funds_to_bentoBox()public returns(uint256) {
-        require(isPurseMember[msg.sender] == true, 'only purse members please');
+
+    // member who have been voted for as next will be the one to claim
+    function claimContributions() public {
+        // checks to ensure only purse members can attempt to claim
+        require(isPurseMember[msg.sender] == true, "only purse members can claim contributions");
+        require(member_has_recieved[msg.sender] == false, "You have recieved a round of contribution already");
+        require(votes_for_member_to_recieve_funds[msg.sender] >= 2, "looks like you're not next inline as there are curently no approval for you from other team members");
+
+                //the funds then gets disbursed to himself
+                //disburse tokens in mapping - contract_total_deposit_balance to _memberAddress
+                
+                if(votes_for_member_to_recieve_funds[msg.sender] != purse.members.length){
+                require(approve_To_Claim_Without_Complete_Votes[msg.sender] == true,
+             "not all members have approved you for claim, which most likely means not all has deposited for you, do ask any purse member to call approveToClaimWithoutCompleteVotes with your address for you to proceed ");
+                tokenInstance.transfer(msg.sender, contract_total_deposit_balance[address(this)]);
+                num_of_members_who_has_recieved_funds++;
+                member_has_recieved[msg.sender] = true;
+                contract_total_deposit_balance[address(this)] = 0;
+
+                }
+                else{
+
+                tokenInstance.transfer(msg.sender, contract_total_deposit_balance[address(this)]);
+                num_of_members_who_has_recieved_funds++;
+                member_has_recieved[msg.sender] = true;
+                contract_total_deposit_balance[address(this)] = 0;
+                }
+                
+
+    }
+
+
+    // this function is meant to give the contract a go-ahead to disburse funds to a member even though he doesnt have complete votes_for_member_to_recieve_funds
+    // this for instance where a member(s) seem unresponsive in the purse group to vote for another person
+    function approveToClaimWithoutCompleteVotes(address _member) public {
+         require(isPurseMember[msg.sender] == true, "only purse members please");
+            require(isPurseMember[_member] == true, "This provided address is not a member");
+
+    }
+
+        //any member can call this function
+    function deposit_funds_to_bentoBox()public {
+        require(isPurseMember[msg.sender] == true, "only purse members please");
         require(purse.members.length == max_member_num, 'members to be in purse are yet to be completed, so collaterals are not complete');
         uint256 MAX_UINT256 = contract_total_collateral_balance[address(this)];
         tokenInstance.approve(bentoBox_address, MAX_UINT256);
