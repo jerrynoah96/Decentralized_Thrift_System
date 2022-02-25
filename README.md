@@ -39,8 +39,3 @@ There are quiet some use cases and functionalities yet to be implemented, say fo
 upon joining a purse), then for some reasons, maybe circumstances, the person is no longer seen to come back to make deposits, ofcourse, the collaterals will cover for this- 
 however, we're working on how best to automate this and keep it decentralized as much as possible.
 
-swap address on Matic maiinet - 0x7c1905Bd06E08067a4Bd780C2AD34d2306bc0375
-
-purseFactory address on matic mainnet - 0x388Bce2B9c1759912944fE42057415910203125A
-
-
